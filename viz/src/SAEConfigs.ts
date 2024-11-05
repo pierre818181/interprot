@@ -28,6 +28,12 @@ export const SAE_CONFIGS: Record<string, SAEConfig> = {
         group: "structural",
       },
       {
+        name: "WD40 middle loop",
+        dim: 4047,
+        desc: "This feature activates on the middle loop of WD40 repeat domains.",
+        group: "structural",
+      },
+      {
         name: "beta strand channel",
         dim: 3883,
         desc: "This feature activates on channel-like structures consisting of beta strands. It fires on a specific beta strands within the channel.",
