@@ -45,7 +45,7 @@ export default function SeqInput({
         </p>
       )}
       {exampleSeqs && (
-        <div className="flex flex-row gap-8 justify-center">
+        <div className="flex flex-row sm:gap-8 justify-between sm:justify-center">
           {Object.entries(exampleSeqs).map(([name, seq]) => (
             <Button variant="outline" key={name} onClick={() => onSubmit(seq)}>
               {name}

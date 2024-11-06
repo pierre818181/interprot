@@ -90,69 +90,71 @@ export default function CustomSeqSearchPage() {
             onSubmit={handleSearch}
             loading={isLoading}
             buttonText="Search"
-            exampleSeqs={EXAMPLE_SEQS_FOR_SEARCH}
+            exampleSeqs={!hasSubmittedSequence ? EXAMPLE_SEQS_FOR_SEARCH : undefined}
           />
         </div>
 
         {searchResults.length > 0 && (
           <div className="flex flex-col gap-2 mt-8 text-left">
-            <div className="flex justify-between items-center px-2">
-              <label className="text-sm">
-                {startIndex} - {endIndex} of {searchResults.length} activating features
-              </label>
-              <div className="flex flex-row items-center gap-4">
-                <label className="font-medium text-sm whitespace-nowrap">Sort results by:</label>
-                <Select
-                  value={sortBy}
-                  onValueChange={(value) => {
-                    setSortBy(value);
-                    setCurrentPage(1);
-                    setSearchResults((prevResults) => {
-                      const sortedResults = [...prevResults];
-                      switch (value) {
-                        case "max":
-                          sortedResults.sort(
-                            (a, b) => Math.max(...b.sae_acts) - Math.max(...a.sae_acts)
-                          );
-                          break;
-                        case "mean":
-                          sortedResults.sort((a, b) => {
-                            const meanA =
-                              a.sae_acts.reduce((sum, val) => sum + val, 0) / a.sae_acts.length;
-                            const meanB =
-                              b.sae_acts.reduce((sum, val) => sum + val, 0) / b.sae_acts.length;
-                            return meanB - meanA;
-                          });
-                          break;
-                        case "mean_activated":
-                          sortedResults.sort((a, b) => {
-                            const activatedA = a.sae_acts.filter((val) => val > 0);
-                            const activatedB = b.sae_acts.filter((val) => val > 0);
-                            const meanA = activatedA.length
-                              ? activatedA.reduce((sum, val) => sum + val, 0) / activatedA.length
-                              : 0;
-                            const meanB = activatedB.length
-                              ? activatedB.reduce((sum, val) => sum + val, 0) / activatedB.length
-                              : 0;
-                            return meanB - meanA;
-                          });
-                          break;
-                      }
-                      return sortedResults;
-                    });
-                  }}
-                >
-                  <SelectTrigger className="w-[340px]">
-                    <SelectValue placeholder="Sort by..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="max">Max activation across sequence</SelectItem>
-                    <SelectItem value="mean">Mean activation across sequence</SelectItem>
-                    <SelectItem value="mean_activated">
-                      Mean activation across activated residues
-                    </SelectItem>
-                  </SelectContent>
-                </Select>
+            <div className="sm:flex sm:flex-row sm:justify-between sm:items-center px-2">
+              <div className="flex flex-col sm:flex-row gap-4 w-full items-start sm:items-center">
+                <div className="order-2 sm:order-1 text-sm">
+                  {startIndex} - {endIndex} of {searchResults.length} activating features
+                </div>
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 w-full sm:w-auto order-1 sm:order-2 sm:ml-auto">
+                  <label className="font-medium text-sm whitespace-nowrap">Sort results by</label>
+                  <Select
+                    value={sortBy}
+                    onValueChange={(value) => {
+                      setSortBy(value);
+                      setCurrentPage(1);
+                      setSearchResults((prevResults) => {
+                        const sortedResults = [...prevResults];
+                        switch (value) {
+                          case "max":
+                            sortedResults.sort(
+                              (a, b) => Math.max(...b.sae_acts) - Math.max(...a.sae_acts)
+                            );
+                            break;
+                          case "mean":
+                            sortedResults.sort((a, b) => {
+                              const meanA =
+                                a.sae_acts.reduce((sum, val) => sum + val, 0) / a.sae_acts.length;
+                              const meanB =
+                                b.sae_acts.reduce((sum, val) => sum + val, 0) / b.sae_acts.length;
+                              return meanB - meanA;
+                            });
+                            break;
+                          case "mean_activated":
+                            sortedResults.sort((a, b) => {
+                              const activatedA = a.sae_acts.filter((val) => val > 0);
+                              const activatedB = b.sae_acts.filter((val) => val > 0);
+                              const meanA = activatedA.length
+                                ? activatedA.reduce((sum, val) => sum + val, 0) / activatedA.length
+                                : 0;
+                              const meanB = activatedB.length
+                                ? activatedB.reduce((sum, val) => sum + val, 0) / activatedB.length
+                                : 0;
+                              return meanB - meanA;
+                            });
+                            break;
+                        }
+                        return sortedResults;
+                      });
+                    }}
+                  >
+                    <SelectTrigger className="w-full sm:w-[340px]">
+                      <SelectValue placeholder="Sort by..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="max">Max activation across sequence</SelectItem>
+                      <SelectItem value="mean">Mean activation across sequence</SelectItem>
+                      <SelectItem value="mean_activated">
+                        Mean activation across activated residues
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </div>
             <div className="flex flex-col gap-4">
