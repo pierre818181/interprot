@@ -1,10 +1,12 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import SeqViewer from "./SeqViewer";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
-import { sequenceToTokens } from "../utils";
+import { sequenceToTokens } from "@/utils.ts";
 import CustomStructureViewer from "./CustomStructureViewer";
+import { getSAEDimActivations, getSteeredSequence } from "@/runpod.ts";
+import SeqInput from "./SeqInput";
+import { useSearchParams } from "react-router-dom";
 
 interface CustomSeqPlaygroundProps {
   feature: number;
@@ -37,83 +39,19 @@ const CustomSeqPlayground = ({ feature }: CustomSeqPlaygroundProps) => {
     initialState.steeredActivations
   );
   const submittedSeqRef = useRef<string>("");
+  const [searchParams, setSearchParams] = useSearchParams();
 
   // Reset all state when feature changes
   useEffect(() => {
     setCustomSeqActivations(initialState.customSeqActivations);
-    setCustomSeq(initialState.customSeq);
+    setCustomSeq(searchParams.get("seq") || initialState.customSeq);
     setViewerState(initialState.playgroundState);
     setSteeredSeq(initialState.steeredSeq);
     setSteerMultiplier(initialState.steerMultiplier);
     setSteeredActivations(initialState.steeredActivations);
-  }, [feature]);
+  }, [feature, searchParams]);
 
-  const fetchSAEActivations = async (seq: string) => {
-    try {
-      const response = await fetch("https://api.runpod.ai/v2/yk9ehzl3h653vj/runsync", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_RUNPOD_API_KEY}`,
-        },
-        body: JSON.stringify({
-          input: {
-            sequence: seq,
-            dim: feature,
-          },
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Network response was not ok");
-      }
-
-      const resp = await response.json();
-      const data = resp.output.data;
-      if (data.tokens_acts_list) {
-        return data.tokens_acts_list;
-      } else {
-        console.error("Unexpected data format:", data);
-      }
-    } catch (error) {
-      console.error("Error fetching activation data:", error);
-    }
-  };
-
-  const getSteeredSequence = async () => {
-    try {
-      const response = await fetch("https://api.runpod.ai/v2/jw4etc8vzvp99p/runsync", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${import.meta.env.VITE_RUNPOD_API_KEY}`,
-        },
-        body: JSON.stringify({
-          input: {
-            sequence: submittedSeqRef.current,
-            dim: feature,
-            multiplier: steerMultiplier,
-          },
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Network response was not ok");
-      }
-
-      const resp = await response.json();
-      const data = resp.output.data;
-      if (data.steered_sequence) {
-        return data.steered_sequence;
-      } else {
-        console.error("Unexpected data format:", data);
-      }
-    } catch (error) {
-      console.error("Error fetching steered sequence:", error);
-    }
-  };
-
-  const handleSubmit = async () => {
+  const handleSubmit = useCallback(async () => {
     setViewerState(PlaygroundState.LOADING_SAE_ACTIVATIONS);
 
     // Reset some states related to downstream actions
@@ -122,10 +60,22 @@ const CustomSeqPlayground = ({ feature }: CustomSeqPlaygroundProps) => {
     setSteerMultiplier(initialState.steerMultiplier);
     setSteeredActivations(initialState.steeredActivations);
 
-    submittedSeqRef.current = customSeq.toUpperCase();
-    const saeActivations = await fetchSAEActivations(submittedSeqRef.current);
+    submittedSeqRef.current = customSeq;
+    setSearchParams({ seq: submittedSeqRef.current });
+    const saeActivations = await getSAEDimActivations({
+      sequence: submittedSeqRef.current,
+      dim: feature,
+    });
     setCustomSeqActivations(saeActivations);
-  };
+  }, [customSeq, setSearchParams, feature]);
+
+  // Automatically submit when seq URL param is present
+  useEffect(() => {
+    const urlSeq = searchParams.get("seq");
+    if (urlSeq && customSeq === urlSeq && customSeqActivations.length === 0) {
+      handleSubmit();
+    }
+  }, [searchParams, customSeq, customSeqActivations.length, handleSubmit]);
 
   const handleSteer = async () => {
     setViewerState(PlaygroundState.LOADING_STEERED_SEQUENCE);
@@ -134,9 +84,13 @@ const CustomSeqPlayground = ({ feature }: CustomSeqPlaygroundProps) => {
     setSteeredActivations(initialState.steeredActivations);
     setSteeredSeq(initialState.steeredSeq);
 
-    const steeredSeq = await getSteeredSequence();
+    const steeredSeq = await getSteeredSequence({
+      sequence: submittedSeqRef.current,
+      dim: feature,
+      multiplier: steerMultiplier,
+    });
     setSteeredSeq(steeredSeq);
-    setSteeredActivations(await fetchSAEActivations(steeredSeq));
+    setSteeredActivations(await getSAEDimActivations({ sequence: steeredSeq, dim: feature }));
   };
 
   const onStructureLoad = useCallback(() => setViewerState(PlaygroundState.IDLE), []);
@@ -144,22 +98,13 @@ const CustomSeqPlayground = ({ feature }: CustomSeqPlaygroundProps) => {
   return (
     <div>
       <div style={{ marginTop: 20 }}>
-        <div className="flex flex-col sm:flex-row gap-2">
-          <Input
-            type="text"
-            className="w-full"
-            value={customSeq}
-            onChange={(e) => setCustomSeq(e.target.value)}
-            placeholder="Enter your own protein sequence"
-          />
-          <Button
-            onClick={handleSubmit}
-            className="w-full sm:w-auto"
-            disabled={playgroundState === PlaygroundState.LOADING_SAE_ACTIVATIONS || !customSeq}
-          >
-            {playgroundState === PlaygroundState.LOADING_SAE_ACTIVATIONS ? "Loading..." : "Submit"}
-          </Button>
-        </div>
+        <SeqInput
+          sequence={customSeq}
+          setSequence={setCustomSeq}
+          onSubmit={handleSubmit}
+          loading={playgroundState === PlaygroundState.LOADING_SAE_ACTIVATIONS}
+          buttonText="Submit"
+        />
       </div>
 
       {/* Once we have SAE activations, display sequence and structure */}
