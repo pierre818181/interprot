@@ -27,7 +27,7 @@ export default function SeqInput({
         placeholder="Enter protein sequence..."
         value={sequence}
         onChange={(e) => setSequence(e.target.value.toUpperCase())}
-        className={`w-full font-mono min-h-[100px] ${
+        className={`w-full font-mono min-h-[100px] text-sm sm:text-sm md:text-sm lg:text-sm text-base ${
           sequence && !isValidProteinSequence(sequence) ? "border-red-500" : ""
         }`}
         onKeyDown={(e) => {
