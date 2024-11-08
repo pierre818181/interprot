@@ -45,13 +45,10 @@ export default function SAESidebar() {
 
   return (
     <>
-      <div
-        className="fixed top-0 w-full bg-background border-b border-border z-50 py-4 px-8 md:hidden"
-        style={{ marginLeft: -28, width: "100%" }}
-      >
-        <div className="flex items-center justify-between">
-          <SidebarTrigger />
-        </div>
+      <div className="fixed flex items-center justify-between top-0 w-full bg-background border-b border-border z-50 py-4 px-6 md:hidden left-0 right-0">
+        <SidebarTrigger />
+        {/* FIXME: minor bug on mobile where this icon gets pushed to the right when the sidebar is open */}
+        <Search onClick={() => navigate(`/sae-viz/${selectedModel}`)} />
       </div>
       <Sidebar>
         <SidebarHeader>
