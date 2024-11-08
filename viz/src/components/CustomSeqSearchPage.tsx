@@ -71,6 +71,9 @@ export default function CustomSeqSearchPage() {
 
       setSearchResults(await getSAEAllDimsActivations({ sequence }));
       setIsLoading(false);
+
+      setStartPos(undefined);
+      setEndPos(undefined);
     },
     [setSearchParams]
   );
@@ -124,6 +127,7 @@ export default function CustomSeqSearchPage() {
                     <div className="flex items-center gap-2">
                       <Input
                         type="number"
+                        className="w-20"
                         placeholder="start"
                         min={1}
                         max={sequence.length}
@@ -137,6 +141,7 @@ export default function CustomSeqSearchPage() {
                       <span className="text-sm"> - </span>
                       <Input
                         type="number"
+                        className="w-20"
                         placeholder="end"
                         min={1}
                         max={sequence.length}
