@@ -34,6 +34,7 @@ const SAEVisualizerPage: React.FC = () => {
           <p className="mt-3">{dimToCuratedMap.get(selectedFeature)?.desc}</p>
         )}
         {SAEConfig?.supportsCustomSequence && <CustomSeqPlayground feature={selectedFeature} />}
+        <h2 className="text-2xl font-semibold mt-8">Top activating sequences</h2>
         <div className="p-4 mt-5 border-2 border-gray-200 border-dashed rounded-lg">
           <div className="overflow-x-auto">
             {featureData.map((seq) => (
