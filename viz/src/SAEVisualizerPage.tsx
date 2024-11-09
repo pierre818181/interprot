@@ -7,6 +7,7 @@ import { Navigate } from "react-router-dom";
 
 import { SAEContext } from "./SAEContext";
 import { NUM_SEQS_TO_DISPLAY } from "./config";
+import { CONTRIBUTORS } from "./SAEConfigs";
 
 const SAEVisualizerPage: React.FC = () => {
   const { selectedFeature, selectedModel, SAEConfig } = useContext(SAEContext);
@@ -25,14 +26,33 @@ const SAEVisualizerPage: React.FC = () => {
   if (selectedFeature === undefined) {
     return <Navigate to={`/sae-viz/${selectedModel}`} />;
   }
+  let desc = <>{dimToCuratedMap.get(selectedFeature)?.desc}</>;
+  const contributor = dimToCuratedMap.get(selectedFeature)?.contributor;
+  if (contributor && contributor in CONTRIBUTORS) {
+    desc = (
+      <div className="flex flex-col gap-2">
+        <p>{dimToCuratedMap.get(selectedFeature)?.desc}</p>
+        <p>
+          This feature was identified by{" "}
+          <a
+            href={CONTRIBUTORS[contributor]}
+            className="underline"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {contributor}
+          </a>
+          .
+        </p>
+      </div>
+    );
+  }
 
   return (
     <>
       <main className="text-left max-w-full overflow-x-auto">
         <h1 className="text-3xl font-semibold md:mt-0 mt-16">Feature {selectedFeature}</h1>
-        {dimToCuratedMap.has(selectedFeature) && (
-          <p className="mt-3">{dimToCuratedMap.get(selectedFeature)?.desc}</p>
-        )}
+        {dimToCuratedMap.has(selectedFeature) && <p className="mt-3">{desc}</p>}
         {SAEConfig?.supportsCustomSequence && <CustomSeqPlayground feature={selectedFeature} />}
         <h2 className="text-2xl font-semibold mt-8">Top activating sequences</h2>
         <div className="p-4 mt-5 border-2 border-gray-200 border-dashed rounded-lg">

@@ -2,6 +2,7 @@ export type CuratedFeature = {
   name: string;
   dim: number;
   desc: string;
+  contributor?: string;
   group?: string;
 };
 
@@ -12,6 +13,11 @@ export type SAEConfig = {
   curated?: CuratedFeature[];
   defaultDim: number;
   supportsCustomSequence?: boolean;
+};
+
+export const CONTRIBUTORS: Record<string, string> = {
+  "Diego del Alamo": "https://x.com/ddelalamo",
+  "Daniel Saltzberg": "https://x.com/dargason",
 };
 
 export const SAE_CONFIGS: Record<string, SAEConfig> = {
@@ -30,7 +36,22 @@ export const SAE_CONFIGS: Record<string, SAEConfig> = {
       {
         name: "WD40 middle loop",
         dim: 4047,
-        desc: "This feature activates on the middle loop of WD40 repeat domains.",
+        desc: "This feature activates on the middle loop of WD40 repeat domains. It highlights every other disordered region at the tip of the propeller.",
+        group: "structural",
+        contributor: "Daniel Saltzberg",
+      },
+      {
+        name: "beta barrel",
+        dim: 4000,
+        desc: "This feature activates on transmembrane beta barrels. It highlights every other residue along each beta strand, weaving a criss-cross pattern. It activates on de novo designed proteins (PDB 6X1K, 6X9Z), and natural proteins (PDB 2MLH).",
+        contributor: "Diego del Alamo",
+        group: "structural",
+      },
+      {
+        name: "membrane exposed helices",
+        dim: 3732,
+        desc: "This feature activates on membrane-exposed helices, as well as on transmembrane beta barrels like those recognized by feature 4000.",
+        contributor: "Diego del Alamo",
         group: "structural",
       },
       {
