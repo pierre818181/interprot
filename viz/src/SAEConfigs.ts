@@ -277,7 +277,7 @@ export const SAE_CONFIGS: Record<string, SAEConfig> = {
         group: "structural",
       },
     ],
-    defaultDim: 2293,
+    defaultDim: 4000,
     supportsCustomSequence: true,
   },
   "SAE16384-L5": {

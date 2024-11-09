@@ -83,6 +83,11 @@ export const isPDBID = (input: string): boolean => {
 
 export const getPDBSequence = async (pdbId: string): Promise<string> => {
   const pdbResponse = await fetch(`https://www.rcsb.org/fasta/entry/${pdbId}/display`);
+
+  if (!pdbResponse.ok) {
+    throw new Error(`Failed to fetch PDB sequence: ${pdbResponse.statusText}`);
+  }
+
   const fastaText = await pdbResponse.text();
   if (fastaText.includes("No valid PDB IDs were submitted.")) {
     throw new Error("Invalid PDB ID");

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { isProteinSequence, isPDBID, getPDBSequence } from "@/utils";
@@ -24,26 +24,38 @@ export default function SeqInput({
   exampleSeqs?: { [key: string]: string };
 }) {
   const [error, setError] = useState<string | null>(null);
-  const isValidInput = (input: string): boolean => {
-    return isProteinSequence(input) || isPDBID(input);
-  };
 
-  const handleSubmit = async () => {
-    // If PBD ID, validate by fetching sequence
-    if (isPDBID(sequence)) {
+  const validateInput = async (input: string): Promise<boolean> => {
+    if (isProteinSequence(input)) {
+      return true;
+    }
+    if (isPDBID(input)) {
       try {
-        await getPDBSequence(sequence);
+        await getPDBSequence(input);
+        return true;
       } catch (e) {
-        console.error(e);
+        console.log("here", e);
         if (e instanceof Error) {
           setError(e.message);
         } else {
           setError("An unknown error occurred");
         }
-        return;
+        return false;
       }
     }
-    onSubmit(sequence);
+    setError("Please enter either a valid protein sequence or a PDB ID");
+    return false;
+  };
+
+  useEffect(() => {
+    setError(null);
+  }, [sequence]);
+
+  const handleSubmit = async () => {
+    // If PBD ID, validate by fetching sequence
+    if (await validateInput(sequence)) {
+      onSubmit(sequence);
+    }
   };
 
   return (
@@ -53,22 +65,16 @@ export default function SeqInput({
         value={sequence}
         onChange={(e) => setSequence(e.target.value.toUpperCase())}
         className={`w-full font-mono min-h-[100px] text-sm sm:text-sm md:text-sm lg:text-sm text-base ${
-          sequence && !isValidInput(sequence) ? "border-red-500" : ""
+          error ? "border-red-500" : ""
         }`}
         onKeyDown={(e) => {
           if (e.key === "Enter" && !e.shiftKey && !loading) {
             e.preventDefault();
-            if (isValidInput(sequence)) {
-              onSubmit(sequence);
-            }
+            handleSubmit();
           }
         }}
       />
-      {sequence && !isValidInput(sequence) && (
-        <p className="text-sm text-red-500">
-          Please enter either a valid protein sequence or a PDB ID
-        </p>
-      )}
+      {error && <p className="text-sm text-red-500">{error}</p>}
       {exampleSeqs && (
         <div className="flex flex-row sm:gap-8 justify-between sm:justify-center">
           {Object.entries(exampleSeqs).map(([name, seq]) => (
@@ -81,11 +87,10 @@ export default function SeqInput({
       <Button
         onClick={handleSubmit}
         className="w-full sm:w-auto"
-        disabled={loading || !sequence || !isValidInput(sequence)}
+        disabled={loading || !sequence || !!error}
       >
         {loading ? "Loading..." : buttonText}
       </Button>
-      {error && <p className="text-left text-sm text-red-500">{error}</p>}
     </div>
   );
 }
