@@ -7,6 +7,7 @@ import { Color } from "molstar/lib/mol-util/color";
 import { redColorMapRGB } from "@/utils.ts";
 import proteinEmoji from "../protein.png";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { ESMFoldCache } from "@/utils";
 
 interface CustomStructureViewerProps {
   viewerId: string;
@@ -27,7 +28,6 @@ const CustomStructureViewer = ({
   const [warning, setWarning] = useState("");
   const isMobile = useIsMobile();
 
-  const ESMFoldCache = useRef<Record<string, string>>({});
   const pluginRef = useRef<PluginContext | null>(null);
 
   const createResidueColorTheme = (activationList: number[], name = "residue-colors") => {
@@ -156,8 +156,8 @@ const CustomStructureViewer = ({
     const renderStructure = async () => {
       setIsLoading(true);
       try {
-        const pdbData = ESMFoldCache.current[seq] || (await foldStructure(seq));
-        ESMFoldCache.current[seq] = pdbData;
+        const pdbData = ESMFoldCache[seq] || (await foldStructure(seq));
+        ESMFoldCache[seq] = pdbData;
         renderViewer(pdbData);
       } catch (error) {
         console.error("Error folding sequence:", error);

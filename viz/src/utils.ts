@@ -67,3 +67,5 @@ export function tokensToSequence(tokens: Array<number>): string {
 export function sequenceToTokens(sequence: string): Array<number> {
   return sequence.split("").map((residue) => residueToToken(residue));
 }
+
+export const ESMFoldCache: Record<string, string> = {};

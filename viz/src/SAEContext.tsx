@@ -59,7 +59,10 @@ export const SAEProvider = ({ children }: { children: React.ReactNode }) => {
         setSelectedFeature: (feature: number | undefined) => {
           setSelectedFeature(feature);
           if (feature !== undefined) {
-            navigate(`/sae-viz/${selectedModel}/${feature}`);
+            const seqMatch = path.match(/\?seq=([^&]+)/);
+            const seq = seqMatch ? seqMatch[1] : "";
+            const seqParam = seq ? `?seq=${seq}` : "";
+            navigate(`/sae-viz/${selectedModel}/${feature}${seqParam}`);
           }
         },
         SAEConfig: SAE_CONFIGS[selectedModel],
