@@ -97,7 +97,7 @@ const CustomSeqPlayground = ({ feature }: CustomSeqPlaygroundProps) => {
 
   return (
     <div>
-      <div style={{ marginTop: 20 }}>
+      <div className="mt-5">
         <SeqInput
           sequence={customSeq}
           setSequence={setCustomSeq}
@@ -136,7 +136,7 @@ const CustomSeqPlayground = ({ feature }: CustomSeqPlaygroundProps) => {
       {/* Once we have SAE activations and the first structure has loaded, render the steering controls */}
       {customSeqActivations.length > 0 &&
         playgroundState !== PlaygroundState.LOADING_SAE_ACTIVATIONS && (
-          <div style={{ marginTop: 20 }}>
+          <div className="mt-5">
             <h3 className="text-xl font-bold mb-4">Sequence Editing via Steering</h3>
             <div className="bg-gray-50 p-4 rounded-lg mb-4">
               <p className="mb-2 text-sm">Steering increases this feature's activation.</p>
