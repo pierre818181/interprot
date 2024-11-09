@@ -28,6 +28,13 @@ export const SAE_CONFIGS: Record<string, SAEConfig> = {
     plmLayer: 24,
     curated: [
       {
+        name: "beta barrel",
+        dim: 4000,
+        desc: "This feature activates on transmembrane beta barrels. It highlights every other residue along each beta strand, weaving a criss-cross pattern. It activates on de novo designed proteins (PDB 6X1K, 6X9Z), and natural proteins (PDB 2MLH).",
+        contributor: "Diego del Alamo",
+        group: "structural",
+      },
+      {
         name: "full turn in alpha helix",
         dim: 2293,
         desc: "This feature activates strongly on every 7th amino acid (approximately two full turns) in alpha helices.",
@@ -39,13 +46,6 @@ export const SAE_CONFIGS: Record<string, SAEConfig> = {
         desc: "This feature activates on the middle loop of WD40 repeat domains. It highlights every other disordered region at the tip of the propeller.",
         group: "structural",
         contributor: "Daniel Saltzberg",
-      },
-      {
-        name: "beta barrel",
-        dim: 4000,
-        desc: "This feature activates on transmembrane beta barrels. It highlights every other residue along each beta strand, weaving a criss-cross pattern. It activates on de novo designed proteins (PDB 6X1K, 6X9Z), and natural proteins (PDB 2MLH).",
-        contributor: "Diego del Alamo",
-        group: "structural",
       },
       {
         name: "membrane exposed helices",
