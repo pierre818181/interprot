@@ -221,7 +221,7 @@ export default function SeqsViewer({ seqs }: SeqsViewerProps) {
             </div>
             <div className="flex-1 overflow-x-auto" ref={containerRef}>
               {alignedSeqs.map((seq) => (
-                <div>
+                <div key={seq.alphafold_id}>
                   {seq.sequence.split("").map((char, index) => {
                     // Only color if not a gap and has valid activation
                     const color =

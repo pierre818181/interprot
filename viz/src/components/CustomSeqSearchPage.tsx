@@ -107,7 +107,7 @@ export default function CustomSeqSearchPage() {
         <h1
           className={`text-4xl text-left sm:text-center ${hasSubmittedSequence ? "mb-6" : "mb-8"}`}
         >
-          Search SAE features by sequence
+          Search SAE features
         </h1>
         <div className={`${hasSubmittedSequence ? "w-full" : ""} flex flex-col gap-4`}>
           <SeqInput
