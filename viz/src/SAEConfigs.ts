@@ -18,6 +18,7 @@ export type SAEConfig = {
 export const CONTRIBUTORS: Record<string, string> = {
   "Diego del Alamo": "https://x.com/ddelalamo",
   "Daniel Saltzberg": "https://x.com/dargason",
+  "James Michael Krieger": "https://x.com/james_krieger",
 };
 
 export const SAE_CONFIGS: Record<string, SAEConfig> = {
@@ -53,6 +54,13 @@ export const SAE_CONFIGS: Record<string, SAEConfig> = {
         desc: "This feature activates on membrane-exposed helices, as well as on transmembrane beta barrels like those recognized by feature 4000.",
         contributor: "Diego del Alamo",
         group: "structural",
+      },
+      {
+        name: "signal peptide cleavage site",
+        dim: 1737,
+        desc: "Activates on signal peptide cleavage sites",
+        group: "structural",
+        contributor: "James Michael Krieger",
       },
       {
         name: "beta strand channel",
