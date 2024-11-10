@@ -42,9 +42,7 @@ const FullSeqViewer: React.FC<FullSeqViewerProps> = ({ sequence, activations, sh
                     {char}
                   </span>
                 </TooltipTrigger>
-                <TooltipContent>
-                  Position: {index + 1}, SAE Activation: {activations[index].toFixed(3)}
-                </TooltipContent>
+                <TooltipContent>SAE Activation: {activations[index].toFixed(3)}</TooltipContent>
               </Tooltip>
             </TooltipProvider>
           );

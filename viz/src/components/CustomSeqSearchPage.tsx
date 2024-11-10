@@ -133,7 +133,7 @@ export default function CustomSeqSearchPage() {
                     <div className="flex items-center gap-2">
                       <Input
                         type="number"
-                        className="w-20"
+                        className="w-20 text-sm placeholder:text-sm"
                         placeholder="start"
                         min={1}
                         max={sequence.length}
@@ -147,7 +147,7 @@ export default function CustomSeqSearchPage() {
                       <span className="text-sm"> - </span>
                       <Input
                         type="number"
-                        className="w-20"
+                        className="w-20 text-sm placeholder:text-sm"
                         placeholder="end"
                         min={1}
                         max={sequence.length}

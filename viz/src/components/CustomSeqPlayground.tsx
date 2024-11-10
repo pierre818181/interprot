@@ -111,6 +111,10 @@ const CustomSeqPlayground = ({ feature }: CustomSeqPlaygroundProps) => {
           onSubmit={handleSubmit}
           loading={playgroundState === PlaygroundState.LOADING_SAE_ACTIVATIONS}
           buttonText="Submit"
+          onClear={() => {
+            setCustomSeq("");
+            setSearchParams({});
+          }}
         />
       </div>
 

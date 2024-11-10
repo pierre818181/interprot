@@ -15,6 +15,7 @@ export default function SeqInput({
   loading,
   buttonText,
   exampleSeqs,
+  onClear,
 }: {
   sequence: string;
   setSequence: (sequence: string) => void;
@@ -22,6 +23,7 @@ export default function SeqInput({
   loading: boolean;
   buttonText: string;
   exampleSeqs?: { [key: string]: string };
+  onClear?: () => void;
 }) {
   const [error, setError] = useState<string | null>(null);
 
@@ -83,13 +85,25 @@ export default function SeqInput({
           ))}
         </div>
       )}
-      <Button
-        onClick={handleSubmit}
-        className="w-full sm:w-auto"
-        disabled={loading || !sequence || !!error}
-      >
-        {loading ? "Loading..." : buttonText}
-      </Button>
+      <div className={`flex ${onClear ? "flex-col sm:flex-row sm:justify-end gap-2" : ""}`}>
+        <Button
+          onClick={handleSubmit}
+          className={`${onClear ? "w-full sm:w-32" : "w-full"}`}
+          disabled={loading || !sequence || !!error}
+        >
+          {loading ? "Loading..." : buttonText}
+        </Button>
+        {onClear && (
+          <Button
+            variant="outline"
+            onClick={onClear}
+            className="w-full sm:w-32"
+            disabled={loading || !sequence}
+          >
+            Clear
+          </Button>
+        )}
+      </div>
     </div>
   );
 }
