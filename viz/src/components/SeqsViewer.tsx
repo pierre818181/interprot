@@ -174,10 +174,10 @@ export default function SeqsViewer({ seqs }: SeqsViewerProps) {
             }}
           >
             <ToggleGroupItem value="first_act" aria-label="Align by first activation">
-              <div>Line up first activation</div>
+              <div>Align first activation</div>
             </ToggleGroupItem>
             <ToggleGroupItem value="max_act" aria-label="Align by maximum activation">
-              <div>Line up max activation</div>
+              <div>Align max activation</div>
             </ToggleGroupItem>
             <ToggleGroupItem value="msa" aria-label="Multiple sequence alignment">
               <div>MSA</div>

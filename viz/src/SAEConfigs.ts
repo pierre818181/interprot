@@ -18,7 +18,7 @@ export type SAEConfig = {
 export const CONTRIBUTORS: Record<string, string> = {
   "Diego del Alamo": "https://x.com/ddelalamo",
   "Daniel Saltzberg": "https://x.com/dargason",
-  "James Michael Krieger": "https://x.com/james_krieger",
+  "James Michael Krieger": "http://github.com/jamesmkrieger",
 };
 
 export const SAE_CONFIGS: Record<string, SAEConfig> = {
@@ -175,6 +175,19 @@ export const SAE_CONFIGS: Record<string, SAEConfig> = {
         dim: 3267,
         desc: "Activates on alanine residues",
         group: "amino acid identity",
+      },
+      {
+        name: "cysteine (some)",
+        dim: 3812,
+        desc: "Activates on some cysteine residues. Typically does not activate on disulfide bridges. Compare with feature 2232 which activates on disulfide bridges.",
+        group: "amino acid identity",
+      },
+      {
+        name: "cysteine (disulfide bridge)",
+        dim: 2232,
+        desc: "Activates on cysteine residues that are part of disulfide bridges. This is clearly demonstrated in PDB 1DSB. PDB 1RQ1 contains lots of cysteine bridges: this feature seems to pick up on the short range ones but not the long range one across residues 52 - 311. Compare with feature 3812 which seems to activate primarily on cysteines that are not part of disulfide bridges.",
+        group: "amino acid identity",
+        contributor: "James Michael Krieger",
       },
       {
         name: "aspartic acid",
