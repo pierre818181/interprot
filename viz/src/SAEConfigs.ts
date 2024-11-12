@@ -274,6 +274,12 @@ export const SAE_CONFIGS: Record<string, SAEConfig> = {
         group: "amino acid identity",
       },
       {
+        name: "arginine",
+        dim: 3569,
+        desc: "Activates on arginine residues",
+        group: "amino acid identity",
+      },
+      {
         name: "kinase beta strands",
         dim: 3642,
         desc: "Activates on some beta strands in kinase domains and weakly on the C-helix",
