@@ -171,6 +171,12 @@ export const SAE_CONFIGS: Record<string, SAEConfig> = {
         group: "amino acid position",
       },
       {
+        name: "last residue",
+        dim: 799,
+        desc: "Activates on the last amino acid in a sequence",
+        group: "amino acid position",
+      },
+      {
         name: "alanine",
         dim: 3267,
         desc: "Activates on alanine residues",
@@ -235,6 +241,12 @@ export const SAE_CONFIGS: Record<string, SAEConfig> = {
         name: "leucine",
         dim: 1497,
         desc: "Activates on leucine residues",
+        group: "amino acid identity",
+      },
+      {
+        name: "valine",
+        dim: 3383,
+        desc: "Activates on valine residues",
         group: "amino acid identity",
       },
       {
