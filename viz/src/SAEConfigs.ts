@@ -315,12 +315,6 @@ export const SAE_CONFIGS: Record<string, SAEConfig> = {
         desc: "Activates on a beta strand and the disordered regions at each end",
         group: "structural",
       },
-      {
-        name: "last residue",
-        dim: 799,
-        desc: "Activates on the last amino acid in a sequence",
-        group: "amino acid position",
-      },
     ],
     defaultDim: 4000,
     supportsCustomSequence: true,
