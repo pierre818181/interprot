@@ -64,7 +64,7 @@ export default function SeqInput({
       <Textarea
         placeholder="Enter protein sequence or PDB ID..."
         value={sequence}
-        onChange={(e) => setSequence(e.target.value.toUpperCase())}
+        onChange={(e) => setSequence(e.target.value.toUpperCase().replace(/[\r\n]+/g, ""))}
         className={`w-full font-mono min-h-[100px] text-sm sm:text-sm md:text-sm lg:text-sm text-base ${
           error ? "border-red-500" : ""
         }`}
