@@ -87,12 +87,6 @@ export const SAE_CONFIGS: Record<string, SAEConfig> = {
         group: "structural",
       },
       {
-        name: "long helix every turn",
-        dim: 214,
-        desc: "This feature activates on interspersed amino acids in long helices in the pattern 100100010010001..., which corresponds to every turn.",
-        group: "structural",
-      },
-      {
         name: "beta strand motif",
         dim: 88,
         desc: "This feature activates on a specific beta strand motif in ABC transporters. The highlighted beta strand is always the one that opposes an alpha helix.",
@@ -159,9 +153,9 @@ export const SAE_CONFIGS: Record<string, SAEConfig> = {
         group: "structural",
       },
       {
-        name: "start M",
+        name: "first residue",
         dim: 600,
-        desc: "Activates on the M amino acid at the start of a sequence",
+        desc: "Activates on the first amino acid at the start of a sequence",
         group: "amino acid position",
       },
       {
@@ -174,6 +168,12 @@ export const SAE_CONFIGS: Record<string, SAEConfig> = {
         name: "last residue",
         dim: 799,
         desc: "Activates on the last amino acid in a sequence",
+        group: "amino acid position",
+      },
+      {
+        name: "end",
+        dim: 1058,
+        desc: "Activates on the last few amino acids in a sequence, with increasing intensity as we get closer to the end",
         group: "amino acid position",
       },
       {
