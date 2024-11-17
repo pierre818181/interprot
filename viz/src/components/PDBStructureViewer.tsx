@@ -189,6 +189,7 @@ const PDBStructureViewer = ({
 
     const renderStructure = async () => {
       setIsLoading(true);
+      if (!proteinActivationsData.pdbId) throw new Error("No PDB ID provided");
       try {
         const pdbData =
           StructureCache[proteinActivationsData.pdbId] ||
