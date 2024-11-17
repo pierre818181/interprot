@@ -1,3 +1,5 @@
+import { getSAEDimActivations } from "./runpod";
+
 export function redColorMapRGB(value: number, maxValue: number) {
   // Ensure value is between 0 and maxValue
   value = Math.max(0, Math.min(value, maxValue));
@@ -71,29 +73,143 @@ export function sequenceToTokens(sequence: string): Array<number> {
 // Cache for sequence -> structure data in PDB format
 export const StructureCache: Record<string, string> = {};
 
-export const isProteinSequence = (sequence: string): boolean => {
+export type AminoAcidSequence = string & { readonly __brand: unique symbol };
+
+export const isProteinSequence = (sequence: string): sequence is AminoAcidSequence => {
   const validAminoAcids = /^[ACDEFGHIKLMNPQRSTVWYBUXZ]+$/i;
   return validAminoAcids.test(sequence.trim());
 };
 
-export const isPDBID = (input: string): boolean => {
+// A special string type requiring passing the isPDBID type guard
+export type PDBID = string & { readonly __brand: unique symbol };
+
+export const isPDBID = (input: string): input is PDBID => {
   const pdbPattern = /^[0-9A-Z]{4}$/i;
   return pdbPattern.test(input.trim());
 };
 
-export const getPDBSequence = async (pdbId: string): Promise<string> => {
-  const pdbResponse = await fetch(`https://www.rcsb.org/fasta/entry/${pdbId}/display`);
+export type PDBChainsData = {
+  id: string;
+  name: string;
+  sequence: AminoAcidSequence;
+};
 
-  if (!pdbResponse.ok) {
-    throw new Error(`Failed to fetch PDB sequence: ${pdbResponse.statusText}`);
+interface PolymerEntity {
+  entity_poly: {
+    pdbx_seq_one_letter_code_can: string;
+  };
+  polymer_entity_instances: Array<{
+    rcsb_id: string;
+    rcsb_polymer_entity_instance_container_identifiers: {
+      auth_asym_id: string;
+    };
+  }>;
+}
+
+/**
+ * Fetches the sequences of a given PDB ID. There may be multiple sequences for proteins with
+ * multiple chains.
+ */
+export const getPDBChainsData = async (pdbId: PDBID): Promise<PDBChainsData[]> => {
+  const query = `
+    query GetFastaSequence($pdbId: String!) {
+      entry(entry_id: $pdbId) {
+        polymer_entities {
+          entity_poly {
+            pdbx_seq_one_letter_code_can
+            rcsb_sample_sequence_length
+          }
+          polymer_entity_instances {
+            rcsb_id
+            rcsb_polymer_entity_instance_container_identifiers {
+              auth_asym_id
+            }
+          }
+        }
+      }
+    }
+  `;
+
+  const response = await fetch("https://data.rcsb.org/graphql", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      query,
+      variables: { pdbId },
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to fetch PDB sequence: ${response.statusText}`);
   }
 
-  const fastaText = await pdbResponse.text();
-  if (fastaText.includes("No valid PDB IDs were submitted.")) {
-    throw new Error("Invalid PDB ID");
+  const data = await response.json();
+
+  if (!data.data?.entry?.polymer_entities) {
+    throw new Error("Invalid PDB ID or unexpected API response");
   }
-  const sequences = fastaText.split(">").filter(Boolean);
-  if (sequences.length === 0) return "";
-  const sequenceLines = sequences[0].split("\n");
-  return sequenceLines.slice(1).join("").trim();
+
+  return data.data.entry.polymer_entities.flatMap((entity: PolymerEntity) => {
+    const sequence = entity.entity_poly.pdbx_seq_one_letter_code_can as AminoAcidSequence;
+
+    return entity.polymer_entity_instances.map(
+      (instance: PolymerEntity["polymer_entity_instances"][0]) => {
+        const chainId = instance.rcsb_polymer_entity_instance_container_identifiers.auth_asym_id;
+        return {
+          id: chainId,
+          name: instance.rcsb_id,
+          sequence,
+        };
+      }
+    );
+  });
+};
+
+// A single amino acid chain and its SAE activations. If from the PDB, the id will be
+// set to the auth_asym_id, e.g. "A". If from a user-submitted sequence, the id will be
+// set to "Unknown". Name is an optional display name only applicable to PDB chains.
+export type ChainActivationsData = {
+  id: string;
+  name?: string;
+  sequence: AminoAcidSequence;
+  activations: number[];
+};
+
+export type ProteinActivationsData = {
+  pdbId?: PDBID;
+  chains: ChainActivationsData[];
+};
+
+export const constructProteinActivationsDataFromPDBID = async (
+  pdbId: PDBID,
+  feature: number
+): Promise<ProteinActivationsData> => {
+  const seqsData = await getPDBChainsData(pdbId);
+  const chains = await Promise.all(
+    seqsData.map(async (seqData) => ({
+      id: seqData.id,
+      name: seqData.name,
+      sequence: seqData.sequence,
+      activations: await getSAEDimActivations({
+        sequence: seqData.sequence,
+        dim: feature,
+      }),
+    }))
+  );
+  return { pdbId, chains };
+};
+
+export const constructProteinActivationsDataFromSequence = async (
+  sequence: AminoAcidSequence,
+  feature: number
+): Promise<ProteinActivationsData> => {
+  const activations = await getSAEDimActivations({
+    sequence,
+    dim: feature,
+  });
+  return {
+    chains: [{ id: "Unknown", sequence, activations }],
+  };
 };
