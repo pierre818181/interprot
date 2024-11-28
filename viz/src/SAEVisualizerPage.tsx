@@ -40,6 +40,39 @@ interface FeatureStats {
   top_pfam: string[];
 }
 
+const fetchData = async (fileURL: string) => {
+  const response = await fetch(fileURL);
+  if (!response.ok) {
+    throw new Error("Network response was not ok or file not found");
+  }
+  return response.json();
+};
+
+const processData = (data: VizFile) => {
+  const topFeatureData =
+    TOP_RANGE in data["ranges"]
+      ? data["ranges"][TOP_RANGE as `${number}-${number}`]["examples"].slice(0, NUM_SEQS_TO_DISPLAY)
+      : [];
+
+  const bottomFeatureData =
+    BOTTOM_RANGE in data["ranges"]
+      ? data["ranges"][BOTTOM_RANGE as `${number}-${number}`]["examples"].slice(
+          0,
+          NUM_SEQS_TO_DISPLAY
+        )
+      : [];
+
+  const featureStats =
+    TOP_RANGE in data["ranges"]
+      ? {
+          freq_active: data["freq_active"],
+          top_pfam: data["top_pfam"],
+        }
+      : undefined;
+
+  return { topFeatureData, bottomFeatureData, featureStats };
+};
+
 const SAEVisualizerPage: React.FC = () => {
   const { selectedFeature, selectedModel, SAEConfig } = useContext(SAEContext);
   const dimToCuratedMap = new Map(SAEConfig?.curated?.map((i) => [i.dim, i]) || []);
@@ -50,33 +83,33 @@ const SAEVisualizerPage: React.FC = () => {
   // Toggle for showing the bottom Molstar
   const [showBottomMolstar, setShowBottomMolstar] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isDeadLatent, setIsDeadLatent] = useState(false);
 
   useEffect(() => {
     const fileURL = `${SAEConfig.baseUrl}${selectedFeature}.json`;
-    // Reset the bottom Molstar visibility
-    setFeatureStats(undefined);
-    setShowBottomMolstar(false);
-    setIsLoading(true);
 
-    fetch(fileURL)
-      .then((response) => response.json())
-      .then((data: VizFile) => {
-        if (TOP_RANGE in data["ranges"]) {
-          const topQuarter = data["ranges"][TOP_RANGE as `${number}-${number}`];
-          const examples = topQuarter["examples"];
-          setTopFeatureData(examples.slice(0, NUM_SEQS_TO_DISPLAY));
-          setFeatureStats({
-            freq_active: data["freq_active"],
-            top_pfam: data["top_pfam"],
-          });
-        }
-        if (BOTTOM_RANGE in data["ranges"]) {
-          const bottomQuarter = data["ranges"][BOTTOM_RANGE as `${number}-${number}`];
-          const examples = bottomQuarter["examples"];
-          setBottomFeatureData(examples.slice(0, NUM_SEQS_TO_DISPLAY));
-        }
+    const loadData = async () => {
+      setFeatureStats(undefined);
+      setShowBottomMolstar(false);
+      setIsLoading(true);
+      setIsDeadLatent(false);
+
+      try {
+        const data = await fetchData(fileURL);
+        const { topFeatureData, bottomFeatureData, featureStats } = processData(data);
+        setTopFeatureData(topFeatureData);
+        setBottomFeatureData(bottomFeatureData);
+        setFeatureStats(featureStats);
+      } catch {
+        setIsDeadLatent(true);
+        setTopFeatureData([]);
+        setBottomFeatureData([]);
+      } finally {
         setIsLoading(false);
-      });
+      }
+    };
+
+    loadData();
   }, [SAEConfig, selectedFeature]);
 
   if (selectedFeature === undefined) {
@@ -106,14 +139,12 @@ const SAEVisualizerPage: React.FC = () => {
 
   return (
     <>
-      <main className="text-left max-w-full overflow-x-auto">
+      <main className="text-left max-w-full overflow-x-auto w-full">
         <div className="flex justify-between items-center mt-3 mb-3">
           <h1 className="text-3xl font-semibold md:mt-0 mt-16">Feature {selectedFeature}</h1>
-            {featureStats && (
-            <div>
-              Activation frequency: {(featureStats.freq_active * 100).toFixed(2)}%
-            </div>
-            )}
+          {featureStats && (
+            <div>Activation frequency: {(featureStats.freq_active * 100).toFixed(2)}%</div>
+          )}
         </div>
         <div>
           {featureStats && featureStats.top_pfam.length > 0 && (
@@ -134,6 +165,9 @@ const SAEVisualizerPage: React.FC = () => {
             </div>
           )}
         </div>
+        {isDeadLatent && (
+          <div className="mt-3">This is a dead latent. It is active for no sequences.</div>
+        )}
         <div className="mt-3">{dimToCuratedMap.has(selectedFeature) && desc}</div>
         {SAEConfig?.supportsCustomSequence && <CustomSeqPlayground feature={selectedFeature} />}
         {isLoading ? (
