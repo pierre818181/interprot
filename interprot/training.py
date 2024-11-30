@@ -32,7 +32,7 @@ if not os.path.exists(args.output_dir):
 
 sae_name = f"esm2_plm1280_l{args.layer_to_use}_sae{args.d_hidden}_k{args.k}_auxk{args.auxk}_{args.model_suffix}"
 wandb_logger = WandbLogger(
-    project="interpretability",
+    project="interprot",
     name=sae_name,
     save_dir=os.path.join(args.output_dir, "wandb"),
 )
