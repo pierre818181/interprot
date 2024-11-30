@@ -23,6 +23,7 @@ parser.add_argument("--dead-steps-threshold", type=int, default=2000)
 parser.add_argument("-e", "--max-epochs", type=int, default=1)
 parser.add_argument("-d", "--num-devices", type=int, default=1)
 parser.add_argument("--model-suffix", type=str, default="")
+parser.add_argument("--wandb-project", type=str, default="interprot")
 
 args = parser.parse_args()
 args.output_dir = f"results_l{args.layer_to_use}_dim{args.d_hidden}_k{args.k}_auxk{args.auxk}_{args.model_suffix}"
@@ -32,7 +33,7 @@ if not os.path.exists(args.output_dir):
 
 sae_name = f"esm2_plm1280_l{args.layer_to_use}_sae{args.d_hidden}_k{args.k}_auxk{args.auxk}_{args.model_suffix}"
 wandb_logger = WandbLogger(
-    project="interprot",
+    project=args.wandb_project,
     name=sae_name,
     save_dir=os.path.join(args.output_dir, "wandb"),
 )
