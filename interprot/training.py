@@ -52,13 +52,16 @@ checkpoint_callback = ModelCheckpoint(
 
 class WandbCheckpointCallback(pl.Callback):
     def on_save_checkpoint(self, trainer, pl_module, checkpoint):
-        artifact = wandb.Artifact(
-            name=f"model-{wandb.run.id}", 
-            type="model",
-            description=f"Model checkpoint at step {trainer.global_step}"
-        )
-        artifact.add_file(trainer.checkpoint_callback.best_model_path)
-        wandb.log_artifact(artifact)
+        # Get the current checkpoint path from the ModelCheckpoint callback
+        checkpoint_path = trainer.callbacks[0].last_model_path
+        if checkpoint_path:  # Only log if we have a valid checkpoint path
+            artifact = wandb.Artifact(
+                name=f"model-{wandb.run.id}", 
+                type="model",
+                description=f"Model checkpoint at step {trainer.global_step}"
+            )
+            artifact.add_file(checkpoint_path)
+            wandb.log_artifact(artifact)
 
 trainer = pl.Trainer(
     max_epochs=args.max_epochs,
