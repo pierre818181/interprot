@@ -1,4 +1,5 @@
 import argparse
+import glob
 import os
 
 import pytorch_lightning as pl
@@ -44,8 +45,9 @@ wandb_logger = WandbLogger(
 )
 
 model = SAELightningModule(args)
-data_module = SequenceDataModule(args.data_dir, args.batch_size)
+wandb_logger.watch(model, log="all")
 
+data_module = SequenceDataModule(args.data_dir, args.batch_size)
 checkpoint_callback = ModelCheckpoint(
     dirpath=os.path.join(args.output_dir, "checkpoints"),
     filename=sae_name + "-{step}-{val_loss:.2f}",
@@ -55,7 +57,6 @@ checkpoint_callback = ModelCheckpoint(
     save_last=True,
 )
 
-wandb_logger.watch(model, log="all")
 
 trainer = pl.Trainer(
     max_epochs=args.max_epochs,
@@ -72,5 +73,8 @@ trainer = pl.Trainer(
 
 trainer.fit(model, data_module)
 trainer.test(model, data_module)
+
+for checkpoint in glob.glob(os.path.join(args.output_dir, "checkpoints", "*.ckpt")):
+    wandb.log_artifact(checkpoint, type="model")
 
 wandb.finish()
