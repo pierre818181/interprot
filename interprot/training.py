@@ -50,16 +50,26 @@ checkpoint_callback = ModelCheckpoint(
     save_last=True,
 )
 
+class WandbCheckpointCallback(pl.Callback):
+    def on_save_checkpoint(self, trainer, pl_module, checkpoint):
+        artifact = wandb.Artifact(
+            name=f"model-{wandb.run.id}", 
+            type="model",
+            description=f"Model checkpoint at step {trainer.global_step}"
+        )
+        artifact.add_file(trainer.checkpoint_callback.best_model_path)
+        wandb.log_artifact(artifact)
+
 trainer = pl.Trainer(
     max_epochs=args.max_epochs,
     accelerator="gpu",
     devices=list(range(args.num_devices)),
-    strategy="ddp" if args.num_devices > 1 else "auto",
+    strategy="auto",
     logger=wandb_logger,
     log_every_n_steps=10,
     val_check_interval=500,
     limit_val_batches=10,
-    callbacks=[checkpoint_callback],
+    callbacks=[checkpoint_callback, WandbCheckpointCallback()],
     gradient_clip_val=1.0,
 )
 
