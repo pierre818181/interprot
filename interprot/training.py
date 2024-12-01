@@ -26,12 +26,17 @@ parser.add_argument("--model-suffix", type=str, default="")
 parser.add_argument("--wandb-project", type=str, default="interprot")
 
 args = parser.parse_args()
-args.output_dir = f"results_l{args.layer_to_use}_dim{args.d_hidden}_k{args.k}_auxk{args.auxk}_{args.model_suffix}"
+args.output_dir = (
+    f"results_l{args.layer_to_use}_dim{args.d_hidden}_k{args.k}_auxk{args.auxk}_{args.model_suffix}"
+)
 
 if not os.path.exists(args.output_dir):
     os.mkdir(args.output_dir)
 
-sae_name = f"esm2_plm1280_l{args.layer_to_use}_sae{args.d_hidden}_k{args.k}_auxk{args.auxk}_{args.model_suffix}"
+sae_name = (
+    f"esm2_plm1280_l{args.layer_to_use}_sae{args.d_hidden}_"
+    f"k{args.k}_auxk{args.auxk}_{args.model_suffix}"
+)
 wandb_logger = WandbLogger(
     project=args.wandb_project,
     name=sae_name,
@@ -50,19 +55,7 @@ checkpoint_callback = ModelCheckpoint(
     save_last=True,
 )
 
-class WandbCheckpointCallback(pl.Callback):
-    def on_save_checkpoint(self, trainer, pl_module, checkpoint):
-        checkpoint_dir = os.path.join(args.output_dir, "checkpoints")
-        checkpoint_files = os.listdir(checkpoint_dir)
-        if checkpoint_files:
-            latest_checkpoint = max([os.path.join(checkpoint_dir, f) for f in checkpoint_files], key=os.path.getmtime)
-            artifact = wandb.Artifact(
-                name=f"model-{wandb.run.id}", 
-                type="model",
-                description=f"Model checkpoint at step {trainer.global_step}"
-            )
-            artifact.add_file(latest_checkpoint)
-            wandb.log_artifact(artifact)
+wandb_logger.watch(model, log="all")
 
 trainer = pl.Trainer(
     max_epochs=args.max_epochs,
@@ -73,7 +66,7 @@ trainer = pl.Trainer(
     log_every_n_steps=10,
     val_check_interval=100,
     limit_val_batches=10,
-    callbacks=[checkpoint_callback, WandbCheckpointCallback()],
+    callbacks=[checkpoint_callback],
     gradient_clip_val=1.0,
 )
 
