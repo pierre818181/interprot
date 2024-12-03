@@ -99,12 +99,6 @@ export const SAE_CONFIGS: Record<string, SAEConfig> = {
         group: "structural",
       },
       {
-        name: "alpha helix: first aa",
-        dim: 3451,
-        desc: "Activates on the first amino acid in a specific alpha helix",
-        group: "structural",
-      },
-      {
         name: "beta strand: first aa",
         dim: 782,
         desc: "Activates on the first amino acid in a specific beta strand",
@@ -120,6 +114,18 @@ export const SAE_CONFIGS: Record<string, SAEConfig> = {
         name: "alpha helix turn",
         dim: 56,
         desc: "Activates on the turn between two alpha helices in ABC transporter proteins",
+        group: "structural",
+      },
+      {
+        name: "alpha helices in TFs",
+        dim: 798,
+        desc: "Activates on alpha helices on transcription factors-like proteins",
+        group: "structural",
+      },
+      {
+        name: "long alpha helices",
+        dim: 1008,
+        desc: "Activates on most amino acids in long alpha helices",
         group: "structural",
       },
       {
@@ -340,27 +346,9 @@ export const SAE_CONFIGS: Record<string, SAEConfig> = {
         group: "alpha helix",
       },
       {
-        name: "sporadic alpha helix",
-        dim: 4095,
-        desc: "Actives without a distinct pattern in alpha helices",
-        group: "alpha helix",
-      },
-      {
-        name: "sporadic alpha helix",
-        dim: 2611,
-        desc: "Actives without a distinct pattern in alpha helices",
-        group: "alpha helix",
-      },
-      {
-        name: "alpha helices in TFs",
-        dim: 798,
-        desc: "Activates on alpha helices on transcription factors-like proteins",
-        group: "alpha helix",
-      },
-      {
-        name: "long alpha helices",
-        dim: 1008,
-        desc: "Activates on most amino acids in long alpha helices",
+        name: "first aa",
+        dim: 3451,
+        desc: "Activates on the first amino acid in short buried alpha helices",
         group: "alpha helix",
       },
       {
