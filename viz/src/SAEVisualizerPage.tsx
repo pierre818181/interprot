@@ -3,25 +3,27 @@ import { useEffect, useState, useContext } from "react";
 import MolstarMulti from "./components/MolstarMulti";
 import CustomSeqPlayground from "./components/CustomSeqPlayground";
 import { Navigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 import proteinEmoji from "./protein.png";
 
 import { SAEContext } from "./SAEContext";
 import { NUM_SEQS_TO_DISPLAY } from "./config";
 import { CONTRIBUTORS } from "./SAEConfigs";
 import SeqsViewer, { SeqWithSAEActs } from "./components/SeqsViewer";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
 const actRanges: [number, number][] = [
-  [0, 0.25],
-  [0.25, 0.5],
-  [0.5, 0.75],
   [0.75, 1],
+  [0.5, 0.75],
+  [0.25, 0.5],
+  [0, 0.25],
 ];
 
 const rangeNames: string[] = actRanges.map(([start, end]) => `${start}-${end}`);
-
-const TOP_RANGE = rangeNames[rangeNames.length - 1];
-const BOTTOM_RANGE = rangeNames[0];
 
 interface VizFile {
   ranges: {
@@ -49,28 +51,22 @@ const fetchData = async (fileURL: string) => {
 };
 
 const processData = (data: VizFile) => {
-  const topFeatureData =
-    TOP_RANGE in data["ranges"]
-      ? data["ranges"][TOP_RANGE as `${number}-${number}`]["examples"].slice(0, NUM_SEQS_TO_DISPLAY)
-      : [];
+  const processedData: { [key: string]: SeqWithSAEActs[] } = {};
+  rangeNames.forEach((rangeName) => {
+    if (rangeName in data.ranges) {
+      processedData[rangeName] = data.ranges[rangeName as `${number}-${number}`].examples.slice(
+        0,
+        NUM_SEQS_TO_DISPLAY
+      );
+    }
+  });
 
-  const bottomFeatureData =
-    BOTTOM_RANGE in data["ranges"]
-      ? data["ranges"][BOTTOM_RANGE as `${number}-${number}`]["examples"].slice(
-          0,
-          NUM_SEQS_TO_DISPLAY
-        )
-      : [];
+  const featureStats = {
+    freq_active: data.freq_active,
+    top_pfam: data.top_pfam,
+  };
 
-  const featureStats =
-    TOP_RANGE in data["ranges"]
-      ? {
-          freq_active: data["freq_active"],
-          top_pfam: data["top_pfam"],
-        }
-      : undefined;
-
-  return { topFeatureData, bottomFeatureData, featureStats };
+  return { rangeData: processedData, featureStats };
 };
 
 const SAEVisualizerPage: React.FC = () => {
@@ -78,10 +74,7 @@ const SAEVisualizerPage: React.FC = () => {
   const dimToCuratedMap = new Map(SAEConfig?.curated?.map((i) => [i.dim, i]) || []);
   const [featureStats, setFeatureStats] = useState<FeatureStats>();
 
-  const [topFeatureData, setTopFeatureData] = useState<SeqWithSAEActs[]>([]);
-  const [bottomFeatureData, setBottomFeatureData] = useState<SeqWithSAEActs[]>([]);
-  // Toggle for showing the bottom Molstar
-  const [showBottomMolstar, setShowBottomMolstar] = useState(false);
+  const [rangeData, setRangeData] = useState<{ [key: string]: SeqWithSAEActs[] }>({});
   const [isLoading, setIsLoading] = useState(true);
   const [isDeadLatent, setIsDeadLatent] = useState(false);
 
@@ -90,20 +83,17 @@ const SAEVisualizerPage: React.FC = () => {
 
     const loadData = async () => {
       setFeatureStats(undefined);
-      setShowBottomMolstar(false);
       setIsLoading(true);
       setIsDeadLatent(false);
 
       try {
         const data = await fetchData(fileURL);
-        const { topFeatureData, bottomFeatureData, featureStats } = processData(data);
-        setTopFeatureData(topFeatureData);
-        setBottomFeatureData(bottomFeatureData);
+        const { rangeData, featureStats } = processData(data);
+        setRangeData(rangeData);
         setFeatureStats(featureStats);
       } catch {
         setIsDeadLatent(true);
-        setTopFeatureData([]);
-        setBottomFeatureData([]);
+        setRangeData({});
       } finally {
         setIsLoading(false);
       }
@@ -176,17 +166,30 @@ const SAEVisualizerPage: React.FC = () => {
           </div>
         ) : (
           <>
-            <SeqsViewer seqs={topFeatureData} title={"Top activating sequences"} />
-            <MolstarMulti proteins={topFeatureData} />
-            <SeqsViewer seqs={bottomFeatureData} title={"Sequences with max activation < 0.25"} />
-            <Button
-              onClick={() => setShowBottomMolstar(!showBottomMolstar)}
-              variant="outline"
-              className="mb-3 mt-3"
-            >
-              {showBottomMolstar ? "Hide" : "Show"} structures
-            </Button>
-            {showBottomMolstar && <MolstarMulti proteins={bottomFeatureData} />}
+            {!isLoading && (
+              <>
+                <SeqsViewer seqs={rangeData[rangeNames[0]]} title="Top activating sequences" />
+                <MolstarMulti proteins={rangeData[rangeNames[0]]} />
+
+                <h2 className="text-2xl font-semibold mt-6">Lower activating sequences</h2>
+                <Accordion type="multiple" className="w-full mt-6">
+                  {rangeNames.slice(1).map(
+                    (rangeName) =>
+                      rangeData[rangeName]?.length > 0 && (
+                        <AccordionItem key={rangeName} value={rangeName}>
+                          <AccordionTrigger className="text-lg">
+                            Top sequences in activation quantile {rangeName}
+                          </AccordionTrigger>
+                          <AccordionContent>
+                            <SeqsViewer seqs={rangeData[rangeName]} />
+                            <MolstarMulti proteins={rangeData[rangeName]} />
+                          </AccordionContent>
+                        </AccordionItem>
+                      )
+                  )}
+                </Accordion>
+              </>
+            )}
           </>
         )}
       </main>
