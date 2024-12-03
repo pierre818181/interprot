@@ -113,7 +113,7 @@ const CustomSeqPlayground = ({ feature }: CustomSeqPlaygroundProps) => {
   const onStructureLoad = useCallback(() => setViewerState(PlaygroundState.IDLE), []);
 
   return (
-    <div>
+    <div className="mb-6">
       <div className="mt-5">
         <SeqInput
           input={proteinInput}
@@ -165,7 +165,7 @@ const CustomSeqPlayground = ({ feature }: CustomSeqPlaygroundProps) => {
         </>
       )}
 
-      {/* Once we have SAE activations, render the steering controls. Currently not supporting PDB ID inputs 
+      {/* Once we have SAE activations, render the steering controls. Currently not supporting PDB ID inputs
           because they may have multiple chains. */}
       {isProteinSequence(proteinInput) &&
         Object.keys(inputProteinActivations).length > 0 &&

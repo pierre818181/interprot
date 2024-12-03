@@ -156,7 +156,7 @@ const SAEVisualizerPage: React.FC = () => {
           )}
         </div>
         {isDeadLatent && (
-          <div className="mt-3">This is a dead latent. It is active for no sequences.</div>
+          <div className="mt-3">This is a dead latent. It does not activate on any sequence.</div>
         )}
         <div className="mt-3">{dimToCuratedMap.has(selectedFeature) && desc}</div>
         {SAEConfig?.supportsCustomSequence && <CustomSeqPlayground feature={selectedFeature} />}

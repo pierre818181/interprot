@@ -166,7 +166,7 @@ export default function SeqsViewer({ seqs, title }: SeqsViewerProps) {
 
   return (
     <>
-      <div className="flex items-center gap-4 mt-8 justify-between flex-wrap">
+      <div className="flex items-center gap-4 mt-2 justify-between flex-wrap">
         {title && <h2 className="text-2xl font-semibold">{title}</h2>}
         <div className="hidden sm:flex items-center gap-4">
           <ToggleGroup
