@@ -178,7 +178,7 @@ const SAEVisualizerPage: React.FC = () => {
                       rangeData[rangeName]?.length > 0 && (
                         <AccordionItem key={rangeName} value={rangeName}>
                           <AccordionTrigger className="text-lg">
-                            Top sequences in activation quantile {rangeName}
+                            Top sequences in activation range {rangeName}
                           </AccordionTrigger>
                           <AccordionContent>
                             <SeqsViewer seqs={rangeData[rangeName]} />
