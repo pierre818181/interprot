@@ -58,7 +58,7 @@ export default function SAESidebar() {
             value={selectedModel}
             onValueChange={(value) => {
               setSelectedModel(value);
-              setSelectedFeature(SAE_CONFIGS[value].defaultDim);
+              navigate(`/sae-viz/${value}/${SAE_CONFIGS[value].defaultDim}`);
             }}
           >
             <SelectTrigger className="mb-3">
