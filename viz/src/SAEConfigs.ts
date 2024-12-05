@@ -24,7 +24,7 @@ export const CONTRIBUTORS: Record<string, string> = {
 export const SAE_CONFIGS: Record<string, SAEConfig> = {
   "SAE4096-L24": {
     baseUrl:
-      "https://raw.githubusercontent.com/liambai/plm-interp-viz-data/refs/heads/main/esm2_plm1280_l24_sae4096_100Kseqs_quantile/",
+      "https://raw.githubusercontent.com/liambai/plm-interp-viz-data/refs/heads/main/esm2_plm1280_l24_sae4096_100Kseqs/",
     numHiddenDims: 4096,
     plmLayer: 24,
     curated: [
@@ -372,54 +372,5 @@ export const SAE_CONFIGS: Record<string, SAEConfig> = {
     ],
     defaultDim: 4000,
     supportsCustomSequence: true,
-  },
-  "SAE16384-L5": {
-    baseUrl:
-      "https://raw.githubusercontent.com/liambai/plm-interp-viz-data/refs/heads/main/esm2_plm1280_l5_sae16384_1Mseqs/",
-    numHiddenDims: 16384,
-    plmLayer: 5,
-    defaultDim: 0,
-  },
-  "SAE16384-L10": {
-    baseUrl:
-      "https://raw.githubusercontent.com/liambai/plm-interp-viz-data/refs/heads/main/esm2_plm1280_l10_sae16384_1Mseqs/",
-    numHiddenDims: 16384,
-    plmLayer: 10,
-    defaultDim: 0,
-  },
-  "SAE16384-L15": {
-    baseUrl:
-      "https://raw.githubusercontent.com/liambai/plm-interp-viz-data/refs/heads/main/esm2_plm1280_l15_sae16384_1Mseqs/",
-    numHiddenDims: 16384,
-    plmLayer: 15,
-    defaultDim: 0,
-  },
-  "SAE16384-L20": {
-    baseUrl:
-      "https://raw.githubusercontent.com/liambai/plm-interp-viz-data/refs/heads/main/esm2_plm1280_l20_sae16384_1Mseqs/",
-    numHiddenDims: 16384,
-    plmLayer: 20,
-    defaultDim: 0,
-  },
-  "SAE16384-L25": {
-    baseUrl:
-      "https://raw.githubusercontent.com/liambai/plm-interp-viz-data/refs/heads/main/esm2_plm1280_l25_sae16384_1Mseqs/",
-    numHiddenDims: 16384,
-    plmLayer: 25,
-    defaultDim: 0,
-  },
-  "SAE16384-L30": {
-    baseUrl:
-      "https://raw.githubusercontent.com/liambai/plm-interp-viz-data/refs/heads/main/esm2_plm1280_l20_sae16384_1Mseqs/",
-    numHiddenDims: 16384,
-    plmLayer: 30,
-    defaultDim: 0,
-  },
-  "SAE16384-L33": {
-    baseUrl:
-      "https://raw.githubusercontent.com/liambai/plm-interp-viz-data/refs/heads/main/esm2_plm1280_l20_sae16384_1Mseqs/",
-    numHiddenDims: 16384,
-    plmLayer: 33,
-    defaultDim: 0,
   },
 };
