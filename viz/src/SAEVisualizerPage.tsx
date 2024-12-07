@@ -70,7 +70,7 @@ const processData = (data: VizFile) => {
 };
 
 const SAEVisualizerPage: React.FC = () => {
-  const { selectedFeature, selectedModel, SAEConfig } = useContext(SAEContext);
+  const { feature, model, SAEConfig } = useContext(SAEContext);
   const dimToCuratedMap = new Map(SAEConfig?.curated?.map((i) => [i.dim, i]) || []);
   const [featureStats, setFeatureStats] = useState<FeatureStats>();
 
@@ -79,7 +79,7 @@ const SAEVisualizerPage: React.FC = () => {
   const [isDeadLatent, setIsDeadLatent] = useState(false);
 
   useEffect(() => {
-    const fileURL = `${SAEConfig.baseUrl}${selectedFeature}.json`;
+    const fileURL = `${SAEConfig.baseUrl}${feature}.json`;
 
     const loadData = async () => {
       setFeatureStats(undefined);
@@ -100,17 +100,17 @@ const SAEVisualizerPage: React.FC = () => {
     };
 
     loadData();
-  }, [SAEConfig, selectedFeature]);
+  }, [SAEConfig, feature]);
 
-  if (selectedFeature === undefined) {
-    return <Navigate to={`/sae-viz/${selectedModel}`} />;
+  if (feature === undefined) {
+    return <Navigate to={`/sae-viz/${model}`} />;
   }
-  let desc = <>{dimToCuratedMap.get(selectedFeature)?.desc}</>;
-  const contributor = dimToCuratedMap.get(selectedFeature)?.contributor;
+  let desc = <>{dimToCuratedMap.get(feature)?.desc}</>;
+  const contributor = dimToCuratedMap.get(feature)?.contributor;
   if (contributor && contributor in CONTRIBUTORS) {
     desc = (
       <div className="flex flex-col gap-2">
-        <p>{dimToCuratedMap.get(selectedFeature)?.desc}</p>
+        <p>{dimToCuratedMap.get(feature)?.desc}</p>
         <p>
           This feature was identified by{" "}
           <a
@@ -131,7 +131,7 @@ const SAEVisualizerPage: React.FC = () => {
     <>
       <main className="text-left max-w-full overflow-x-auto w-full">
         <div className="flex justify-between items-center mt-3 mb-3">
-          <h1 className="text-3xl font-semibold md:mt-0 mt-16">Feature {selectedFeature}</h1>
+          <h1 className="text-3xl font-semibold md:mt-0 mt-16">Feature {feature}</h1>
           {featureStats && (
             <div>Activation frequency: {(featureStats.freq_active * 100).toFixed(2)}%</div>
           )}
@@ -159,9 +159,9 @@ const SAEVisualizerPage: React.FC = () => {
           <div className="mt-3">This is a dead latent. It does not activate on any sequence.</div>
         ) : (
           <>
-            <div className="mt-3">{dimToCuratedMap.has(selectedFeature) && desc}</div>
+            <div className="mt-3">{dimToCuratedMap.has(feature) && desc}</div>
             {SAEConfig?.supportsCustomSequence && (
-              <CustomSeqPlayground feature={selectedFeature} saeName={selectedModel} />
+              <CustomSeqPlayground feature={feature} saeName={model} />
             )}
             {isLoading ? (
               <div className="flex items-center justify-center w-full mt-5">

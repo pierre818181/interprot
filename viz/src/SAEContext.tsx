@@ -1,76 +1,33 @@
-import { createContext, useState, useEffect } from "react";
+import { createContext } from "react";
 import { SAE_CONFIGS, SAEConfig } from "./SAEConfigs";
 import { DEFAULT_SAE_MODEL } from "./config";
 import { SidebarProvider } from "@/components/ui/sidebar";
-import { useNavigate } from "react-router-dom";
 import SAESidebar from "./components/SAESidebar";
+import { useParams } from "react-router-dom";
 
 interface SAEContextType {
-  selectedModel: string;
-  setSelectedModel: (model: string) => void;
-  selectedFeature: number | undefined;
-  setSelectedFeature: (feature: number | undefined) => void;
+  model: string;
+  feature: number | undefined;
   SAEConfig: SAEConfig;
 }
 
 export const SAEContext = createContext<SAEContextType>({
-  selectedModel: DEFAULT_SAE_MODEL,
-  setSelectedModel: () => {},
+  model: DEFAULT_SAE_MODEL,
   SAEConfig: SAE_CONFIGS[DEFAULT_SAE_MODEL],
-  selectedFeature: SAE_CONFIGS[DEFAULT_SAE_MODEL].defaultDim,
-  setSelectedFeature: () => {},
+  feature: SAE_CONFIGS[DEFAULT_SAE_MODEL].defaultDim,
 });
 
 export const SAEProvider = ({ children }: { children: React.ReactNode }) => {
-  const path = window.location.hash.substring(1);
-
-  const modelMatch = path.match(/\/(?:sae-viz\/)?([^/]+)/);
-  const featureMatch = path.match(/\/(?:sae-viz\/)?[^/]+\/(\d+)/);
-
-  const urlModel = modelMatch ? modelMatch[1] : DEFAULT_SAE_MODEL;
-  const [selectedModel, setSelectedModel] = useState<string>(
-    SAE_CONFIGS[urlModel] ? urlModel : DEFAULT_SAE_MODEL
-  );
-
-  const urlFeature = featureMatch ? Number(featureMatch[1]) : undefined;
-  const [selectedFeature, setSelectedFeature] = useState<number | undefined>(urlFeature);
-
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (urlFeature !== undefined && urlFeature !== selectedFeature) {
-      setSelectedFeature(urlFeature);
-    }
-  }, [urlFeature, selectedFeature]);
+  const { model: modelParam, feature: featureParam } = useParams();
+  const model = modelParam ? modelParam : DEFAULT_SAE_MODEL;
+  const feature = featureParam ? parseInt(featureParam) : undefined;
 
   return (
     <SAEContext.Provider
       value={{
-        selectedModel: selectedModel,
-        setSelectedModel: (model: string) => {
-          setSelectedModel(model);
-          if (selectedFeature !== undefined) {
-            navigate(`/sae-viz/${model}/${selectedFeature}`);
-          } else {
-            navigate(`/sae-viz/${model}`);
-          }
-        },
-        selectedFeature: selectedFeature,
-        setSelectedFeature: (feature: number | undefined) => {
-          setSelectedFeature(feature);
-          if (feature !== undefined) {
-            const seqMatch = path.match(/\?seq=([^&]+)/);
-            const pdbMatch = path.match(/\?pdb=([^&]+)/);
-            const seq = seqMatch ? seqMatch[1] : "";
-            const pdb = pdbMatch ? pdbMatch[1] : "";
-            const queryParams = [];
-            if (seq) queryParams.push(`seq=${seq}`);
-            if (pdb) queryParams.push(`pdb=${pdb}`);
-            const queryString = queryParams.length ? `?${queryParams.join("&")}` : "";
-            navigate(`/sae-viz/${selectedModel}/${feature}${queryString}`);
-          }
-        },
-        SAEConfig: SAE_CONFIGS[selectedModel],
+        model: model,
+        feature: feature,
+        SAEConfig: SAE_CONFIGS[model],
       }}
     >
       <SidebarProvider>

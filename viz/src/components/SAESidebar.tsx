@@ -19,20 +19,19 @@ import {
 import { Separator } from "@/components/ui/separator";
 import HomeNavigator from "@/components/HomeNavigator";
 import { Toggle } from "@/components/ui/toggle";
-import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Dices, Search } from "lucide-react";
 import { SAEContext } from "../SAEContext";
 import Markdown from "markdown-to-jsx";
+import { usePreserveQueryParamsNavigate } from "@/hooks/useNagivateWithQueryParams";
 
 export default function SAESidebar() {
   const { setOpenMobile } = useSidebar();
-  const navigate = useNavigate();
-  const { selectedModel, setSelectedModel, selectedFeature, setSelectedFeature, SAEConfig } =
-    useContext(SAEContext);
+  const navigate = usePreserveQueryParamsNavigate();
+  const { model, feature, SAEConfig } = useContext(SAEContext);
 
   const handleFeatureChange = (feature: number) => {
-    setSelectedFeature(feature);
+    navigate(`/sae-viz/${model}/${feature}`);
     setOpenMobile(false);
   };
 
@@ -47,7 +46,7 @@ export default function SAESidebar() {
     <>
       <div className="fixed flex items-center justify-between top-0 w-full bg-background border-b border-border z-50 py-4 px-6 md:hidden left-0 right-0">
         <SidebarTrigger />
-        <Search onClick={() => navigate(`/sae-viz/${selectedModel}`)} />
+        <Search onClick={() => navigate(`/sae-viz/${model}`)} />
       </div>
       <Sidebar>
         <SidebarHeader>
@@ -55,9 +54,8 @@ export default function SAESidebar() {
             <HomeNavigator />
           </div>
           <Select
-            value={selectedModel}
+            value={model}
             onValueChange={(value) => {
-              setSelectedModel(value);
               navigate(`/sae-viz/${value}/${SAE_CONFIGS[value].defaultDim}`);
             }}
           >
@@ -100,8 +98,7 @@ export default function SAESidebar() {
             variant="outline"
             className="mb-3 mx-3 whitespace-normal text-left h-auto py-2"
             onClick={() => {
-              navigate(`/sae-viz/${selectedModel}`);
-              setSelectedFeature(undefined);
+              navigate(`/sae-viz/${model}`);
               setOpenMobile(false);
             }}
           >
@@ -122,7 +119,7 @@ export default function SAESidebar() {
                         key={`feature-${c.dim}`}
                         style={{ width: "100%", paddingLeft: 20, textAlign: "left" }}
                         className="justify-start"
-                        pressed={selectedFeature === c.dim}
+                        pressed={feature === c.dim}
                         onPressedChange={() => handleFeatureChange(c.dim)}
                       >
                         {c.name}
@@ -138,7 +135,7 @@ export default function SAESidebar() {
                   key={`feature-${i}`}
                   style={{ width: "100%", paddingLeft: 20 }}
                   className="justify-start"
-                  pressed={selectedFeature === i}
+                  pressed={feature === i}
                   onPressedChange={() => handleFeatureChange(i)}
                 >
                   {i}

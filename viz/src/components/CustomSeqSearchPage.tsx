@@ -23,7 +23,7 @@ import { isPDBID, isProteinSequence, AminoAcidSequence, getPDBChainsData } from 
 import { useUrlState } from "@/hooks/useUrlState";
 import { SAEContext } from "@/SAEContext";
 export default function CustomSeqSearchPage() {
-  const { selectedModel } = useContext(SAEContext);
+  const { model } = useContext(SAEContext);
 
   const { urlInput, setUrlInput } = useUrlState();
   const [input, setInput] = useState<string>("");
@@ -70,7 +70,6 @@ export default function CustomSeqSearchPage() {
 
   const handleSearch = useCallback(
     async (submittedInput: ValidSeqInput) => {
-      console.log("handling search");
       setIsLoading(true);
       setInput(submittedInput);
 
@@ -88,13 +87,13 @@ export default function CustomSeqSearchPage() {
       }
 
       submittedSeqRef.current = seq;
-      setSearchResults(await getSAEAllDimsActivations({ sequence: seq, sae_name: selectedModel }));
+      setSearchResults(await getSAEAllDimsActivations({ sequence: seq, sae_name: model }));
       setIsLoading(false);
 
       setStartPos(undefined);
       setEndPos(undefined);
     },
-    [selectedModel, setUrlInput]
+    [model, setUrlInput]
   );
 
   useEffect(() => {
