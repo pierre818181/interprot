@@ -217,6 +217,12 @@ export const SAE_CONFIGS: Record<string, SAEConfig> = {
         group: "amino acid identity",
       },
       {
+        name: "threonine",
+        dim: 220,
+        desc: "Activates on threonine residues",
+        group: "amino acid identity",
+      },
+      {
         name: "isoleucine",
         dim: 3978,
         desc: "Activates on isoleucine residues",
@@ -387,6 +393,12 @@ export const SAE_CONFIGS: Record<string, SAEConfig> = {
     supportsCustomSequence: true,
     curated: [
       {
+        name: "beta sheet alternating",
+        dim: 305,
+        desc: "Activates on beta sheets in a weaving pattern. While it activates most strongly on cadherins, it also activates on beta barrels (e.g. PDB 2MLH).",
+        group: "structural",
+      },
+      {
         name: "beta strand middle residue",
         dim: 2832,
         desc: "Activates on the middle residue of a beta strand in antibody domains",
@@ -450,6 +462,30 @@ export const SAE_CONFIGS: Record<string, SAEConfig> = {
         name: "methionine",
         dim: 1087,
         desc: "Activates on methionine residues",
+        group: "amino acid identity",
+      },
+      {
+        name: "threonine",
+        dim: 3234,
+        desc: "Activates on threonine residues",
+        group: "amino acid identity",
+      },
+      {
+        name: "histidine",
+        dim: 767,
+        desc: "Activates on histidine residues",
+        group: "amino acid identity",
+      },
+      {
+        name: "first residue",
+        dim: 3558,
+        desc: "Activates on the first amino acid at the start of a sequence",
+        group: "amino acid position",
+      },
+      {
+        name: "lysine",
+        dim: 335,
+        desc: "Activates on lysine residues",
         group: "amino acid identity",
       },
       {

@@ -74,6 +74,7 @@ export default function CustomSeqSearchPage() {
     setTempEndPos(endPos);
     setTempMinPercentActivation(minPercentActivation);
     setTempMaxPercentActivation(maxPercentActivation);
+    setWarning(undefined);
   }, [startPos, endPos, minPercentActivation, maxPercentActivation]);
 
   const applyFilters = () => {
@@ -181,7 +182,7 @@ export default function CustomSeqSearchPage() {
     >
       <div className={`${hasSubmittedInput ? "w-full px-4" : "w-full max-w-2xl"} mt-16 sm:mt-0`}>
         <h1 className={`text-4xl text-left sm:text-center ${hasSubmittedInput ? "mb-6" : "mb-8"}`}>
-          Search SAE features
+          Search features of {model}
         </h1>
         <div className={`${hasSubmittedInput ? "w-full" : ""} flex flex-col gap-4`}>
           <SeqInput

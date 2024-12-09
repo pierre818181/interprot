@@ -53,12 +53,7 @@ export default function SAESidebar() {
           <div className="m-3">
             <HomeNavigator />
           </div>
-          <Select
-            value={model}
-            onValueChange={(value) => {
-              navigate(`/sae-viz/${value}/${SAE_CONFIGS[value].defaultDim}`);
-            }}
-          >
+          <Select value={model} onValueChange={(value) => navigate(`/sae-viz/${value}`)}>
             <SelectTrigger className="mb-3">
               <SelectValue placeholder="Select SAE Model" />
             </SelectTrigger>
