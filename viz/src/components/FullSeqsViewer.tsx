@@ -67,7 +67,7 @@ const FullSeqsViewer: React.FC<FullSeqViewerProps> = ({ proteinActivationsData }
                           </span>
                         </TooltipTrigger>
                         <TooltipContent>
-                          Position: {index}, SAE Activation: {chain.activations[index].toFixed(3)}
+                          Position: {index}, SAE Activation: {chain.activations[index]?.toFixed(3)}
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>

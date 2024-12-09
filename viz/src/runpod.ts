@@ -49,26 +49,44 @@ export async function postRunpod(
   }
 }
 
-// Cache for sequence+dim -> activations
+// Maintain two caches:
+// 1. model+dim+sequence -> activations
+// 2. model+sequence -> all dims activations
 const SAEDimActivationsCache: Record<string, number[]> = {};
+const SAEAllDimsActivationsCache: Record<string, Array<{ dim: number; sae_acts: number[] }>> = {};
 
 export async function getSAEDimActivations(input: RunpodSAEDimActivationsInput): Promise<number[]> {
-  const cacheKey = `${input.sequence}-${input.dim}`;
-  if (cacheKey in SAEDimActivationsCache) {
-    return SAEDimActivationsCache[cacheKey];
+  // First try the dim specific cache
+  const dimCacheKey = `${input.sae_name}-${input.sequence}-${input.dim}`;
+  if (dimCacheKey in SAEDimActivationsCache) {
+    return SAEDimActivationsCache[dimCacheKey];
   }
+  // It's possible that the all dims cache is populated for a previous search against all dims.
+  // If so, we can retrieve the dim activations.
+  const allDimsCacheKey = `${input.sae_name}-${input.sequence}`;
+  if (allDimsCacheKey in SAEAllDimsActivationsCache) {
+    const allDimsData = SAEAllDimsActivationsCache[allDimsCacheKey];
+    const dimData = allDimsData.find((d) => d.dim === input.dim);
+    if (dimData) {
+      return dimData.sae_acts;
+    }
+  }
+
+  // Both caches have missed, call API.
   const data = await postRunpod(input, "yk9ehzl3h653vj");
-  SAEDimActivationsCache[cacheKey] = data.tokens_acts_list;
+  SAEDimActivationsCache[dimCacheKey] = data.tokens_acts_list;
   return data.tokens_acts_list;
 }
 
 export async function getSAEAllDimsActivations(
   input: RunpodSAEAllDimsActivationsInput
 ): Promise<Array<{ dim: number; sae_acts: number[] }>> {
-  const data = await postRunpod(input, "yk9ehzl3h653vj");
-  for (const { dim, sae_acts } of data.token_acts_list_by_active_dim) {
-    SAEDimActivationsCache[`${input.sequence}-${dim}`] = sae_acts;
+  const cacheKey = `${input.sae_name}-${input.sequence}`;
+  if (cacheKey in SAEAllDimsActivationsCache) {
+    return SAEAllDimsActivationsCache[cacheKey];
   }
+  const data = await postRunpod(input, "yk9ehzl3h653vj");
+  SAEAllDimsActivationsCache[cacheKey] = data.token_acts_list_by_active_dim;
   return data.token_acts_list_by_active_dim;
 }
 
