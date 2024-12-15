@@ -1,3 +1,5 @@
+import { AminoAcidSequence, PDBID } from "./utils";
+
 export type CuratedFeature = {
   name: string;
   dim: number;
@@ -11,6 +13,7 @@ export type SAEConfig = {
   description: string;
   numHiddenDims: number;
   plmLayer: number;
+  searchExamples?: { [key: string]: AminoAcidSequence | PDBID };
   curated?: CuratedFeature[];
   defaultDim: number;
   supportsCustomSequence?: boolean;
@@ -30,6 +33,15 @@ export const SAE_CONFIGS: Record<string, SAEConfig> = {
       "This SAE was trained on layer 24 of [ESM2-650M](https://huggingface.co/facebook/esm2_t33_650M_UR50D) using sequences from [UniRef50](https://www.uniprot.org/help/uniref) and has 4096 hidden dimensions. Click on a feature below to visualize its activation pattern.",
     numHiddenDims: 4096,
     plmLayer: 24,
+    searchExamples: {
+      // @ts-expect-error I know this is a protein sequence
+      "WD40 domain sequence":
+        "MADTSDLTNYVLPASPNWYCSTGTDFSITGLYGFAAKKCVYLLDVNGPVPAFRGQFTEHTDRVSSVRFCPHALHPGLCASGADDKTVRLWDVETKGVLANHTTHTAKVTSISWSPQVKDLILSADEKGTVIAWYYNKNTVHSTCPIQEYIFCVESSSVSSQQAAVGGELLLWDLSTPSPKDKVHVFGSGHSRIVFNVSCTPCGTKLMTTSMDRQVILWDVARCQQICTIATLGGYVYAMAISPLDPGTLALGVGDNMIRVWHTTSESAPYDAISLWQGIKSKVMMLAGVADKVKFGFLDATFRHDRHLCPGEMAGHMRYHPTREIDLS",
+      // @ts-expect-error I know this is a PDB ID
+      "PDB 5C03 (Kinase)": "5C03",
+      // @ts-expect-error I know this is a protein sequence
+      "SH3 domain sequence": "TAGKIFRAMYDYMAADADEVSFKDGDAIINVQAIDEGWMYGTVQRTGRTGMLPANYVEAI",
+    },
     curated: [
       {
         name: "beta barrel",
@@ -389,6 +401,15 @@ export const SAE_CONFIGS: Record<string, SAEConfig> = {
       "This SAE was trained on layer 24 of [ESM2-650M](https://huggingface.co/facebook/esm2_t33_650M_UR50D) using antibody sequences from [PLAbDab](https://opig.stats.ox.ac.uk/webapps/plabdab/) and has 4096 hidden dimensions. Click on a feature below to visualize its activation pattern.",
     numHiddenDims: 4096,
     plmLayer: 24,
+    searchExamples: {
+      // @ts-expect-error I know this is a PDB ID
+      "PDB 5JW5 (MEDI8852, binds influenza A hemagglutinin)": "5JW5",
+      // @ts-expect-error I know this is a PDB ID
+      "PDB 5FHA (mAb114, binds ebolavirus glycoprotein)": "5FHA",
+      // @ts-expect-error I know this is a protein sequence
+      "PDB 3HFM L chain sequence":
+        "DIVLTQSPATLSVTPGNSVSLSCRASQSIGNNLHWYQQKSHESPRLLIKYASQSISGIPSRFSGSGSGTDFTLSINSVETEDFGMYFCQQSNSWPYTFGGGTKLEIKRADAAPTVSIFPPSSEQLTSGGASVVCFLNNFYPKDINVKWKIDGSERQNGVLNSWTDQDSKDSTYSMSSTLTLTKDEYERHNSYTCEATHKTSTSPIVKSFNRNEC",
+    },
     defaultDim: 0,
     supportsCustomSequence: true,
     curated: [

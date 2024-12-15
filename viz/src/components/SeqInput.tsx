@@ -19,7 +19,7 @@ export default function SeqInput({
   onSubmit: (input: ValidSeqInput) => void;
   loading: boolean;
   buttonText: string;
-  exampleSeqs?: { [key: string]: AminoAcidSequence };
+  exampleSeqs?: { [key: string]: AminoAcidSequence | PDBID };
   onClear?: () => void;
 }) {
   const [error, setError] = useState<string | null>(null);
@@ -65,7 +65,7 @@ export default function SeqInput({
       />
       {error && <p className="text-sm text-red-500">{error}</p>}
       {exampleSeqs && (
-        <div className="flex flex-row sm:gap-8 justify-between sm:justify-center">
+        <div className="flex flex-row flex-wrap sm:gap-x-8 gap-x-2 gap-y-1 justify-between sm:justify-center">
           {Object.entries(exampleSeqs).map(([name, seq]) => (
             <Button variant="outline" key={name} onClick={() => onSubmit(seq)}>
               {name}
