@@ -15,6 +15,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import Markdown from "@/components/Markdown";
 
 const actRanges: [number, number][] = [
   [0.75, 1],
@@ -105,26 +106,10 @@ const SAEVisualizerPage: React.FC = () => {
   if (feature === undefined) {
     return <Navigate to={`/sae-viz/${model}`} />;
   }
-  let desc = <>{dimToCuratedMap.get(feature)?.desc}</>;
+  let descStr = dimToCuratedMap.get(feature)?.desc || "";
   const contributor = dimToCuratedMap.get(feature)?.contributor;
   if (contributor && contributor in CONTRIBUTORS) {
-    desc = (
-      <div className="flex flex-col gap-2">
-        <p>{dimToCuratedMap.get(feature)?.desc}</p>
-        <p>
-          This feature was identified by{" "}
-          <a
-            href={CONTRIBUTORS[contributor]}
-            className="underline"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {contributor}
-          </a>
-          .
-        </p>
-      </div>
-    );
+    descStr += `\n\n This feature was identified by [${contributor}](${CONTRIBUTORS[contributor]}).`;
   }
 
   return (
@@ -158,8 +143,8 @@ const SAEVisualizerPage: React.FC = () => {
         {isDeadLatent ? (
           <div className="mt-3">This is a dead latent. It does not activate on any sequence.</div>
         ) : (
-          <>
-            <div className="mt-3">{dimToCuratedMap.has(feature) && desc}</div>
+          <div className="mt-3">
+            <Markdown>{descStr}</Markdown>
             {SAEConfig?.supportsCustomSequence && (
               <CustomSeqPlayground feature={feature} saeName={model} />
             )}
@@ -198,7 +183,7 @@ const SAEVisualizerPage: React.FC = () => {
                 )}
               </>
             )}
-          </>
+          </div>
         )}
       </main>
     </>

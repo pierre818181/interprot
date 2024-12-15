@@ -1,5 +1,6 @@
 import { useContext } from "react";
 import { CuratedFeature, SAE_CONFIGS } from "../SAEConfigs";
+import { Link } from "react-router-dom";
 import {
   Select,
   SelectContent,
@@ -19,10 +20,9 @@ import {
 import { Separator } from "@/components/ui/separator";
 import HomeNavigator from "@/components/HomeNavigator";
 import { Toggle } from "@/components/ui/toggle";
-import { Button } from "@/components/ui/button";
 import { Dices, Search } from "lucide-react";
 import { SAEContext } from "../SAEContext";
-import Markdown from "markdown-to-jsx";
+import Markdown from "@/components/Markdown";
 import { usePreserveQueryParamsNavigate } from "@/hooks/useNagivateWithQueryParams";
 
 export default function SAESidebar() {
@@ -66,40 +66,23 @@ export default function SAESidebar() {
             </SelectContent>
           </Select>
           <div className="text-sm text-left px-3 mb-2">
-            <Markdown
-              options={{
-                overrides: {
-                  a: {
-                    props: {
-                      className: "underline",
-                    },
-                  },
-                },
-              }}
-            >
-              {SAEConfig.description}
-            </Markdown>
+            <Markdown>{SAEConfig.description}</Markdown>
           </div>
-          <Button
-            variant="outline"
-            className="mb-3 mx-3"
-            onClick={() => {
-              handleFeatureChange(Math.floor(Math.random() * SAEConfig.numHiddenDims));
-            }}
+          <Link
+            to={`/sae-viz/${model}/${Math.floor(Math.random() * SAEConfig.numHiddenDims)}`}
+            className="mb-3 mx-3 py-2 flex items-center justify-center text-sm border rounded-md hover:bg-accent hover:text-accent-foreground bg-background shadow-sm transition-colors"
+            onClick={() => setOpenMobile(false)}
           >
             <Dices className="w-4 h-4 mr-2" /> Random Feature
-          </Button>
-          <Button
-            variant="outline"
-            className="mb-3 mx-3 whitespace-normal text-left h-auto py-2"
-            onClick={() => {
-              navigate(`/sae-viz/${model}`);
-              setOpenMobile(false);
-            }}
+          </Link>
+          <Link
+            to={`/sae-viz/${model}`}
+            className="mb-3 mx-3 py-2 flex items-center justify-center text-sm border rounded-md hover:bg-accent hover:text-accent-foreground bg-background shadow-sm transition-colors"
+            onClick={() => setOpenMobile(false)}
           >
             <Search className="w-4 h-4 mr-2 shrink-0" />
             <span>Search SAE features</span>
-          </Button>
+          </Link>
           <Separator />
         </SidebarHeader>
         <SidebarContent>

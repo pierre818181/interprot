@@ -252,11 +252,14 @@ export default function CustomSeqSearchPage() {
     if (selectedChain && chains.length > 0) {
       const chain = chains.find((c) => c.id === selectedChain);
       if (chain) {
+        setSearchResults([]);
         submittedSeqRef.current = chain.sequence;
         getSAEAllDimsActivations({
           sequence: chain.sequence,
           sae_name: model,
-        }).then(setSearchResults);
+        }).then((results) => {
+          setSearchResults(results);
+        });
       }
     }
   }, [selectedChain, chains, model]);
@@ -283,24 +286,24 @@ export default function CustomSeqSearchPage() {
         </div>
 
         <div className="flex flex-col gap-2 mt-4 text-left">
+          {!isLoading && chains.length > 1 && (
+            <div className="flex items-center gap-2 mb-4">
+              <Select value={selectedChain} onValueChange={setSelectedChain}>
+                <SelectTrigger className="w-[200px]">
+                  <SelectValue placeholder="Select chain" />
+                </SelectTrigger>
+                <SelectContent>
+                  {chains.map((chain) => (
+                    <SelectItem key={chain.id} value={chain.id}>
+                      Chain {chain.id}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
           {searchResults.length > 0 && (
             <>
-              {chains.length > 1 && (
-                <div className="flex items-center gap-2 mb-4">
-                  <Select value={selectedChain} onValueChange={setSelectedChain}>
-                    <SelectTrigger className="w-[200px]">
-                      <SelectValue placeholder="Select chain" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {chains.map((chain) => (
-                        <SelectItem key={chain.id} value={chain.id}>
-                          Chain {chain.id}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
               <div className="sm:flex sm:flex-row sm:justify-between sm:items-center px-2">
                 <div className="flex flex-col sm:flex-row gap-4 w-full items-start sm:items-center">
                   <div className="order-2 sm:order-1 text-sm">

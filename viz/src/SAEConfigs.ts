@@ -53,7 +53,7 @@ export const SAE_CONFIGS: Record<string, SAEConfig> = {
       {
         name: "WD40 middle loop",
         dim: 4047,
-        desc: "This feature activates on the middle loop of WD40 repeat domains. It highlights every other disordered region at the tip of the propeller.",
+        desc: "This feature activates on the middle loop of [WD40 repeat](https://en.wikipedia.org/wiki/WD40_repeat) domains. It highlights every other disordered region at the tip of the propeller.",
         group: "structural",
         contributor: "Daniel Saltzberg",
       },
@@ -410,29 +410,35 @@ export const SAE_CONFIGS: Record<string, SAEConfig> = {
       "REGN10987 (binds SARS-CoV-2 spike protein) light chain sequence":
         "QSALTQPASVSGSPGQSITISCTGTSSDVGGYNYVSWYQQHPGKAPKLMIYDVSKRPSGVSNRFSGSKSGNTASLTISGLQSEDEADYYCNSLTSISTWVFGGGTKLTVLGQPKAAPSVTLFPPSSEELQANKATLVCLISDFYPGAVTVAWKADSSPVKAGVETTTPSKQSNNKYAASSYLSLTPEQWKSHRSYSCQVTHEGSTVEKTVAPTECS",
     },
-    defaultDim: 0,
+    defaultDim: 2699,
     supportsCustomSequence: true,
     curated: [
       {
-        name: "H2",
-        dim: 2817,
-        desc: "Activates on the H2 CDR loop",
+        name: "CDR2",
+        dim: 2699,
+        desc: "Activates around the CDR2 (2nd [Complementarity Determining Region](https://en.wikipedia.org/wiki/Complementarity-determining_region)) loop for both the heavy and light chains. For example, PDB [8YWP](https://opig.stats.ox.ac.uk/webapps/sabdab-sabpred/sabdab/structureviewer/?pdb=8ywp) has YASNRYT as the light chain CDR2 sequence and WWDDD as the heavy chain CDR2 sequence.",
         group: "CDR",
       },
       {
-        name: "H1 start",
+        name: "h2",
+        dim: 2817,
+        desc: "Activates on the H2 CDR loop. For example, PDB [9DF0](https://opig.stats.ox.ac.uk/webapps/sabdab-sabpred/sabdab/structureviewer/?pdb=9df0) has YYSGN as the H2 CDR sequence.",
+        group: "CDR",
+      },
+      {
+        name: "h1 start",
         dim: 3369,
         desc: "Activates on the first amino acid in the H1 CDR loop",
         group: "CDR",
       },
       {
-        name: "H1 end",
+        name: "h1 end",
         dim: 2295,
         desc: "Activates on the last amino acid in the H1 CDR loop",
         group: "CDR",
       },
       {
-        name: "H3 start",
+        name: "h3 start",
         dim: 923,
         desc: "Activates on the first amino acid in the H3 CDR loop",
         group: "CDR",
