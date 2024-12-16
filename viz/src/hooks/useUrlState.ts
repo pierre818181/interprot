@@ -1,54 +1,60 @@
-import { useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
+import { useCallback, useEffect, useRef } from "react";
 
-/**
- * A custom hook for managing URL search parameters related to protein sequences and PDB IDs.
- *
- * @returns {Object} An object containing:
- *   - value: The current value of either the 'pdb' or 'seq' parameter
- *   - setValue: Function to set either 'pdb' or 'seq' parameter
- *   - clear: Function to clear all search parameters
- */
-export function useUrlState() {
+const NUMBER_KEYS = ["start", "end", "minPctAct", "maxPctAct"];
+function useUrlState<S>(
+  initialState?: S | (() => S)
+): readonly [
+  Partial<S>,
+  (stateOrUpdater: Partial<S> | ((prev: Partial<S>) => Partial<S>)) => void
+] {
   const [searchParams, setSearchParams] = useSearchParams();
-
-  /**
-   * Gets the current value of either the 'pdb' or 'seq' parameter
-   * @returns {string} The value of 'pdb' or 'seq' parameter, or empty string if neither exists
-   */
-  const getValue = useCallback(() => {
-    return searchParams.get("pdb") || searchParams.get("seq") || "";
-  }, [searchParams]);
-
-  /**
-   * Sets either the 'pdb' or 'seq' parameter, removing the other
-   * @param {('seq'|'pdb')} key - Which parameter to set
-   * @param {string|null} newValue - Value to set the parameter to
-   */
-  const setValue = useCallback(
-    (key: "seq" | "pdb", newValue: string | null) => {
-      const newParams = new URLSearchParams(searchParams);
-      newParams.delete("seq");
-      newParams.delete("pdb");
-      if (newValue) {
-        newParams.set(key, newValue);
-      }
-      setSearchParams(newParams);
-    },
-    [searchParams, setSearchParams]
+  const initialStateRef = useRef(
+    typeof initialState === "function" ? (initialState as () => S)() : initialState
   );
 
-  /**
-   * Removes all search parameters from the URL
-   */
-  const clear = useCallback(() => {
-    const newParams = new URLSearchParams();
-    setSearchParams(newParams);
-  }, [setSearchParams]);
+  // Parse current search params into object
+  const parseSearchParams = useCallback(() => {
+    const result: Partial<S> = {};
+    for (const [key, value] of searchParams.entries()) {
+      result[key as keyof S] = NUMBER_KEYS.includes(key)
+        ? (Number(value) as S[keyof S])
+        : (value as S[keyof S]);
+    }
+    return result;
+  }, [searchParams]);
 
-  return {
-    urlInput: getValue(),
-    setUrlInput: setValue,
-    clearUrlInput: clear,
-  } as const;
+  // Update URL search params
+  const setState = useCallback(
+    (stateOrUpdater: Partial<S> | ((prev: Partial<S>) => Partial<S>)) => {
+      const currentState = parseSearchParams();
+      const updatedParams =
+        typeof stateOrUpdater === "function" ? stateOrUpdater(currentState) : stateOrUpdater;
+
+      const newSearchParams = new URLSearchParams(searchParams);
+
+      // Update only the specified parameters
+      Object.entries(updatedParams).forEach(([key, value]) => {
+        if (value === undefined) {
+          newSearchParams.delete(key);
+        } else {
+          newSearchParams.set(key, String(value));
+        }
+      });
+
+      setSearchParams(newSearchParams);
+    },
+    [setSearchParams, parseSearchParams, searchParams]
+  );
+
+  // Initialize state on mount
+  useEffect(() => {
+    if (initialStateRef.current) {
+      setState(initialStateRef.current);
+    }
+  }, [setState]);
+
+  return [parseSearchParams(), setState] as const;
 }
+
+export default useUrlState;

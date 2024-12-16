@@ -1,4 +1,4 @@
-import { useContext, useState, useEffect, useCallback, useRef } from "react";
+import { useContext, useState, useEffect, useCallback, useRef, useMemo } from "react";
 import SAEFeatureCard from "./SAEFeatureCard";
 import {
   Pagination,
@@ -25,7 +25,7 @@ import {
   getPDBChainsData,
   PDBChainsData,
 } from "@/utils";
-import { useUrlState } from "@/hooks/useUrlState";
+import useUrlState from "@/hooks/useUrlState";
 import { SAEContext } from "@/SAEContext";
 import { SAE_CONFIGS } from "@/SAEConfigs";
 import {
@@ -40,89 +40,90 @@ import { Filter } from "lucide-react";
 
 const RESULTS_PER_PAGE = 20;
 const DEFAULT_MAX_PERCENT_ACTIVATION = 20;
+const DEFAULT_SORT_BY = "max";
+
+type UrlState = {
+  pdb: string;
+  seq: string;
+  chain: string;
+  start: number;
+  end: number;
+  minPctAct: number;
+  maxPctAct: number;
+  sortBy: string;
+};
 
 export default function CustomSeqSearchPage() {
   const { model } = useContext(SAEContext);
 
-  const { urlInput, setUrlInput } = useUrlState();
+  const [urlState, setUrlState] = useUrlState<UrlState>();
   const [input, setInput] = useState<string>("");
   const [searchResults, setSearchResults] = useState<Array<{ dim: number; sae_acts: number[] }>>(
     []
   );
   const [isLoading, setIsLoading] = useState(false);
-  const hasSubmittedInput = urlInput !== "";
+  const hasSubmittedInput = urlState.pdb || urlState.seq;
   const submittedSeqRef = useRef<AminoAcidSequence | undefined>(undefined);
-
   const [currentPage, setCurrentPage] = useState(1);
-  const [sortBy, setSortBy] = useState("max");
 
   const [startPos, setStartPos] = useState<number | undefined>();
   const [endPos, setEndPos] = useState<number | undefined>();
-
-  const [minPercentActivation, setMinPercentActivation] = useState<number | undefined>();
-  const [maxPercentActivation, setMaxPercentActivation] = useState<number | undefined>(
-    DEFAULT_MAX_PERCENT_ACTIVATION
-  );
-
-  const [tempStartPos, setTempStartPos] = useState<number | undefined>();
-  const [tempEndPos, setTempEndPos] = useState<number | undefined>();
-  const [tempMinPercentActivation, setTempMinPercentActivation] = useState<number | undefined>();
-  const [tempMaxPercentActivation, setTempMaxPercentActivation] = useState<number | undefined>(
-    DEFAULT_MAX_PERCENT_ACTIVATION
+  const [minPctAct, setMinPctAct] = useState<number | undefined>();
+  const [maxPctAct, setMaxPctAct] = useState<number | undefined>(
+    urlState.maxPctAct ?? DEFAULT_MAX_PERCENT_ACTIVATION
   );
 
   const [isFilterOpen, setIsFilterOpen] = useState(false);
-
   const [chains, setChains] = useState<PDBChainsData[]>([]);
-  const [selectedChain, setSelectedChain] = useState<string>("");
-
-  useEffect(() => {
-    setTempStartPos(startPos);
-    setTempEndPos(endPos);
-    setTempMinPercentActivation(minPercentActivation);
-    setTempMaxPercentActivation(maxPercentActivation);
-  }, [startPos, endPos, minPercentActivation, maxPercentActivation]);
 
   const applyFilters = () => {
-    setStartPos(tempStartPos);
-    setEndPos(tempEndPos);
-    setMinPercentActivation(tempMinPercentActivation);
-    setMaxPercentActivation(tempMaxPercentActivation);
+    setUrlState({
+      start: startPos,
+      end: endPos,
+      minPctAct: minPctAct,
+      maxPctAct: maxPctAct,
+    });
     setCurrentPage(1);
     setIsFilterOpen(false);
   };
 
+  // FIXME: there's a bug where this doesn't clear maxPctAct
   const clearFilters = () => {
-    setTempStartPos(undefined);
-    setTempEndPos(undefined);
-    setTempMinPercentActivation(undefined);
-    setTempMaxPercentActivation(DEFAULT_MAX_PERCENT_ACTIVATION);
     setStartPos(undefined);
     setEndPos(undefined);
-    setMinPercentActivation(undefined);
-    setMaxPercentActivation(DEFAULT_MAX_PERCENT_ACTIVATION);
+    setMinPctAct(undefined);
+    setMaxPctAct(undefined);
+    setUrlState({
+      start: undefined,
+      end: undefined,
+      minPctAct: undefined,
+      maxPctAct: undefined,
+    });
     setCurrentPage(1);
     setIsFilterOpen(false);
   };
 
-  const filteredResults = searchResults.filter((result) => {
-    if (!startPos && !endPos && !minPercentActivation && !maxPercentActivation) return true;
-    const hasActivationInRange = result.sae_acts.some((act, pos) => {
-      const afterStart = !startPos || pos >= startPos;
-      const beforeEnd = !endPos || pos <= endPos;
-      return act > 0 && afterStart && beforeEnd;
+  const filteredResults = useMemo(() => {
+    return searchResults.filter((result) => {
+      if (!urlState.start && !urlState.end && !urlState.minPctAct && !urlState.maxPctAct)
+        return true;
+      const hasActivationInRange = result.sae_acts.some((act, pos) => {
+        const afterStart = !urlState.start || pos >= urlState.start;
+        const beforeEnd = !urlState.end || pos <= urlState.end;
+        return act > 0 && afterStart && beforeEnd;
+      });
+
+      if (urlState.minPctAct || urlState.maxPctAct) {
+        const activatedCount = result.sae_acts.filter((act) => act > 0).length;
+        const percentActivated = (activatedCount / result.sae_acts.length) * 100;
+        const aboveMin = !urlState.minPctAct || percentActivated >= urlState.minPctAct;
+        const belowMax = !urlState.maxPctAct || percentActivated <= urlState.maxPctAct;
+        return hasActivationInRange && aboveMin && belowMax;
+      }
+
+      return hasActivationInRange;
     });
-
-    if (minPercentActivation || maxPercentActivation) {
-      const activatedCount = result.sae_acts.filter((act) => act > 0).length;
-      const percentActivated = (activatedCount / result.sae_acts.length) * 100;
-      const aboveMin = !minPercentActivation || percentActivated >= minPercentActivation;
-      const belowMax = !maxPercentActivation || percentActivated <= maxPercentActivation;
-      return hasActivationInRange && aboveMin && belowMax;
-    }
-
-    return hasActivationInRange;
-  });
+  }, [searchResults, urlState.start, urlState.end, urlState.minPctAct, urlState.maxPctAct]);
 
   const totalPages = Math.ceil(filteredResults.length / RESULTS_PER_PAGE);
   const currentResults = filteredResults.slice(
@@ -144,29 +145,16 @@ export default function CustomSeqSearchPage() {
       if (isPDBID(submittedInput)) {
         const pdbChainsData = await getPDBChainsData(submittedInput);
         setChains(pdbChainsData);
-
-        // If there's only one chain, use it directly
-        if (pdbChainsData.length === 1) {
-          submittedSeqRef.current = pdbChainsData[0].sequence;
-          setSearchResults(
-            await getSAEAllDimsActivations({
-              sequence: pdbChainsData[0].sequence,
-              sae_name: model,
-            })
-          );
-          setUrlInput("pdb", submittedInput);
-        } else {
-          // If there are multiple chains, set the first one as default
-          setSelectedChain(pdbChainsData[0].id);
-          submittedSeqRef.current = pdbChainsData[0].sequence;
-          setSearchResults(
-            await getSAEAllDimsActivations({
-              sequence: pdbChainsData[0].sequence,
-              sae_name: model,
-            })
-          );
-          setUrlInput("pdb", submittedInput);
-        }
+        setUrlState((prev) => ({
+          chain: prev.chain || pdbChainsData[0].id,
+        }));
+        submittedSeqRef.current = pdbChainsData[0].sequence;
+        setSearchResults(
+          await getSAEAllDimsActivations({
+            sequence: pdbChainsData[0].sequence,
+            sae_name: model,
+          })
+        );
       } else {
         submittedSeqRef.current = submittedInput;
         setSearchResults(
@@ -175,36 +163,21 @@ export default function CustomSeqSearchPage() {
             sae_name: model,
           })
         );
-        setUrlInput("seq", submittedInput);
         setChains([]);
       }
 
       setIsLoading(false);
-      setStartPos(undefined);
-      setEndPos(undefined);
-      setMinPercentActivation(undefined);
-      setMaxPercentActivation(DEFAULT_MAX_PERCENT_ACTIVATION);
     },
-    [model, setUrlInput]
+    [model, setUrlState]
   );
-
-  useEffect(() => {
-    if (urlInput && (isPDBID(urlInput) || isProteinSequence(urlInput))) {
-      setInput(urlInput);
-      handleSearch(urlInput);
-    } else {
-      setSearchResults([]);
-      setInput("");
-    }
-  }, [urlInput, handleSearch]);
 
   const sortResults = useCallback(
     (results: Array<{ dim: number; sae_acts: number[] }>) => {
       const sortedResults = [...results];
-      const start = startPos ?? 0;
-      const end = endPos ?? results[0]?.sae_acts.length ?? 0;
+      const start = urlState.start ?? 0;
+      const end = urlState.end ?? results[0]?.sae_acts.length ?? 0;
 
-      switch (sortBy) {
+      switch (urlState.sortBy) {
         case "max":
           sortedResults.sort((a, b) => {
             const maxA = Math.max(...a.sae_acts.slice(start, end + 1));
@@ -239,18 +212,29 @@ export default function CustomSeqSearchPage() {
       }
       return sortedResults;
     },
-    [sortBy, startPos, endPos]
+    [urlState.sortBy, urlState.start, urlState.end]
   );
 
+  // Do a search whenever the input changes
   useEffect(() => {
-    if (searchResults.length > 0) {
-      setSearchResults((prevResults) => sortResults(prevResults));
+    if (urlState.pdb && isPDBID(urlState.pdb)) {
+      setInput(urlState.pdb);
+      handleSearch(urlState.pdb);
+    } else if (urlState.seq && isProteinSequence(urlState.seq)) {
+      setInput(urlState.seq);
+      handleSearch(urlState.seq);
+    } else {
+      setInput("");
+      setSearchResults([]);
     }
-  }, [startPos, endPos, sortResults, searchResults.length]);
+    // handleSearch runs unnecessarily if I add it here
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [urlState.pdb, urlState.seq]);
 
+  // Do a search whenever the chain changes
   useEffect(() => {
-    if (selectedChain && chains.length > 0) {
-      const chain = chains.find((c) => c.id === selectedChain);
+    if (urlState.chain && chains.length > 0) {
+      const chain = chains.find((c) => c.id === urlState.chain);
       if (chain) {
         setSearchResults([]);
         submittedSeqRef.current = chain.sequence;
@@ -262,7 +246,26 @@ export default function CustomSeqSearchPage() {
         });
       }
     }
-  }, [selectedChain, chains, model]);
+  }, [urlState.chain, chains, model]);
+
+  // Set default filter and sort once results are loaded
+  useEffect(() => {
+    if (!searchResults.length) return;
+    if (!urlState.maxPctAct) {
+      setUrlState({ maxPctAct: DEFAULT_MAX_PERCENT_ACTIVATION });
+      setMaxPctAct(DEFAULT_MAX_PERCENT_ACTIVATION);
+    }
+    if (!urlState.sortBy) {
+      setUrlState({ sortBy: DEFAULT_SORT_BY });
+    }
+  }, [searchResults.length, urlState.maxPctAct, urlState.sortBy, setUrlState]);
+
+  // Sort results whenever the sortBy or start/end position changes
+  useEffect(() => {
+    if (searchResults.length > 0) {
+      setSearchResults((prevResults) => sortResults(prevResults));
+    }
+  }, [urlState.sortBy, urlState.start, urlState.end, sortResults, searchResults.length]);
 
   return (
     <main
@@ -278,7 +281,13 @@ export default function CustomSeqSearchPage() {
           <SeqInput
             input={input}
             setInput={setInput}
-            onSubmit={handleSearch}
+            onSubmit={(seqInput) => {
+              if (isPDBID(seqInput)) {
+                setUrlState({ pdb: seqInput, seq: undefined });
+              } else {
+                setUrlState({ pdb: undefined, seq: seqInput });
+              }
+            }}
             loading={isLoading}
             buttonText="Search"
             exampleSeqs={!hasSubmittedInput ? SAE_CONFIGS[model].searchExamples : undefined}
@@ -286,9 +295,12 @@ export default function CustomSeqSearchPage() {
         </div>
 
         <div className="flex flex-col gap-2 mt-4 text-left">
-          {!isLoading && chains.length > 1 && (
+          {!isLoading && urlState.pdb && (
             <div className="flex items-center gap-2 mb-4">
-              <Select value={selectedChain} onValueChange={setSelectedChain}>
+              <Select
+                value={urlState.chain}
+                onValueChange={(value) => setUrlState({ chain: value })}
+              >
                 <SelectTrigger className="w-[200px]">
                   <SelectValue placeholder="Select chain" />
                 </SelectTrigger>
@@ -316,15 +328,17 @@ export default function CustomSeqSearchPage() {
                         <Button variant="outline" size="sm" className="flex items-center gap-2">
                           <Filter className="h-4 w-4" />
                           Filters
-                          {(startPos || endPos || minPercentActivation || maxPercentActivation) && (
+                          {(urlState.start ||
+                            urlState.end ||
+                            urlState.minPctAct ||
+                            urlState.maxPctAct) && (
                             <span className="ml-1 h-2 w-2 rounded-full bg-primary"></span>
                           )}
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent className="w-80">
-                        <DropdownMenuLabel>Filter Features</DropdownMenuLabel>
+                        <DropdownMenuLabel>Filter Results</DropdownMenuLabel>
                         <DropdownMenuSeparator />
-
                         <div className="p-4 space-y-4">
                           <div className="space-y-2">
                             <label className="text-sm font-medium">
@@ -340,10 +354,10 @@ export default function CustomSeqSearchPage() {
                                 placeholder="start"
                                 min={0}
                                 max={submittedSeqRef.current?.length}
-                                value={tempStartPos !== undefined ? tempStartPos : ""}
+                                value={startPos !== undefined ? startPos : ""}
                                 onChange={(e) => {
                                   const val = e.target.value ? parseInt(e.target.value) : undefined;
-                                  setTempStartPos(val);
+                                  setStartPos(val);
                                 }}
                               />
                               <span className="text-sm">-</span>
@@ -353,10 +367,10 @@ export default function CustomSeqSearchPage() {
                                 placeholder="end"
                                 min={0}
                                 max={submittedSeqRef.current?.length}
-                                value={tempEndPos !== undefined ? tempEndPos : ""}
+                                value={endPos !== undefined ? endPos : ""}
                                 onChange={(e) => {
                                   const val = e.target.value ? parseInt(e.target.value) : undefined;
-                                  setTempEndPos(val);
+                                  setEndPos(val);
                                 }}
                               />
                             </div>
@@ -373,10 +387,10 @@ export default function CustomSeqSearchPage() {
                                 placeholder="min %"
                                 min={0}
                                 max={100}
-                                value={tempMinPercentActivation || ""}
+                                value={minPctAct || ""}
                                 onChange={(e) => {
                                   const val = e.target.value ? parseInt(e.target.value) : undefined;
-                                  setTempMinPercentActivation(val);
+                                  setMinPctAct(val);
                                 }}
                               />
                               <span className="text-sm">-</span>
@@ -386,10 +400,10 @@ export default function CustomSeqSearchPage() {
                                 placeholder="max %"
                                 min={0}
                                 max={100}
-                                value={tempMaxPercentActivation || ""}
+                                value={maxPctAct || ""}
                                 onChange={(e) => {
                                   const val = e.target.value ? parseInt(e.target.value) : undefined;
-                                  setTempMaxPercentActivation(val);
+                                  setMaxPctAct(val);
                                 }}
                               />
                             </div>
@@ -413,11 +427,10 @@ export default function CustomSeqSearchPage() {
                     </DropdownMenu>
 
                     <Select
-                      value={sortBy}
+                      value={urlState.sortBy}
                       onValueChange={(value) => {
-                        setSortBy(value);
+                        setUrlState({ sortBy: value });
                         setCurrentPage(1);
-                        setSearchResults((prevResults) => sortResults(prevResults));
                       }}
                     >
                       <SelectTrigger className="w-full sm:w-[350px]">
@@ -452,8 +465,8 @@ export default function CustomSeqSearchPage() {
                           },
                         ],
                       }}
-                      highlightStart={startPos}
-                      highlightEnd={endPos}
+                      highlightStart={urlState.start}
+                      highlightEnd={urlState.end}
                     />
                   ))}
                   <Pagination>
