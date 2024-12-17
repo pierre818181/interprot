@@ -2,6 +2,7 @@ import { useSearchParams } from "react-router-dom";
 import { useCallback, useEffect, useRef } from "react";
 
 const NUMBER_KEYS = ["start", "end", "minPctAct", "maxPctAct"];
+
 function useUrlState<S>(
   initialState?: S | (() => S)
 ): readonly [

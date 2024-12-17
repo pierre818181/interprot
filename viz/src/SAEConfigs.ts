@@ -58,6 +58,18 @@ export const SAE_CONFIGS: Record<string, SAEConfig> = {
         contributor: "Daniel Saltzberg",
       },
       {
+        name: "antibody disulfide bridge",
+        dim: 1056,
+        desc: "Activates on a disulfide bridge in the antigen-binding domain of antibodies. Highlighted in PDB 3HFM, an antibody-antigen complex.",
+        group: "structural",
+      },
+      {
+        name: "antibody disordered",
+        dim: 2957,
+        desc: "Activates disordered regions in antigen-binding domains of antibodies. For example in PDB 8ULH, it activates on 2 loops in both the light and heavy chains.",
+        group: "structural",
+      },
+      {
         name: "membrane exposed helices",
         dim: 3732,
         desc: "This feature activates on membrane-exposed helices, as well as on transmembrane beta barrels like those recognized by feature 4000.",
@@ -283,6 +295,12 @@ export const SAE_CONFIGS: Record<string, SAEConfig> = {
         group: "amino acid identity",
       },
       {
+        name: "serine",
+        dim: 1473,
+        desc: "Activates on serine residues",
+        group: "amino acid identity",
+      },
+      {
         name: "tryptophan",
         dim: 2685,
         desc: "Activates on tryptophan residues",
@@ -420,6 +438,12 @@ export const SAE_CONFIGS: Record<string, SAEConfig> = {
         group: "CDR",
       },
       {
+        name: "CDR3",
+        dim: 195,
+        desc: "Activates around the CDR3 (3rd CDR) loop for both the heavy and light chains. For example, PDB [8ULH](https://opig.stats.ox.ac.uk/webapps/sabdab-sabpred/sabdab/structureviewer/?pdb=8ulh) has MQATHWPGT as the light chain CDR3 sequence and DVPVVAAVLRDY as the heavy chain CDR3 sequence.",
+        group: "CDR",
+      },
+      {
         name: "h2",
         dim: 2817,
         desc: "Activates on the H2 CDR loop. For example, PDB [9DF0](https://opig.stats.ox.ac.uk/webapps/sabdab-sabpred/sabdab/structureviewer/?pdb=9df0) has YYSGN as the H2 CDR sequence.",
@@ -507,6 +531,12 @@ export const SAE_CONFIGS: Record<string, SAEConfig> = {
         name: "valine",
         dim: 445,
         desc: "Activates on valine residues",
+        group: "amino acid identity",
+      },
+      {
+        name: "serine",
+        dim: 2469,
+        desc: "Activates on serine residues",
         group: "amino acid identity",
       },
       {
