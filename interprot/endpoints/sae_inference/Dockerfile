@@ -20,7 +20,7 @@ RUN gdown https://drive.google.com/uc?id=19aCVCVLleTc4QSiXZsi5hPqrE21duk6q
 
 WORKDIR /
 
-COPY handler.py .
+COPY interprot/endpoints/sae_inference/handler.py .
 
 EXPOSE 8000
 
