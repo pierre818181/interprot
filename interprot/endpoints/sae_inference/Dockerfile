@@ -20,6 +20,9 @@ RUN gdown https://drive.google.com/uc?id=19aCVCVLleTc4QSiXZsi5hPqrE21duk6q
 
 WORKDIR /
 
+# Bust cache by downloading a dynamic page: https://stackoverflow.com/a/55621942
+# This ensures that any update to handlerl.py gets reflected
+ADD https://google.com cache_bust
 COPY interprot/endpoints/sae_inference/handler.py .
 
 EXPOSE 8000
