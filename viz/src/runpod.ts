@@ -10,8 +10,7 @@ type RunpodSAEAllDimsActivationsInput = {
 };
 
 type RunpodSteeringInput = {
-  // TODO: support different SAE models
-  // sae_name: string
+  sae_name: string;
   sequence: string;
   dim: number;
   multiplier: number;

@@ -145,9 +145,7 @@ const SAEVisualizerPage: React.FC = () => {
         ) : (
           <div className="mt-3">
             <Markdown>{descStr}</Markdown>
-            {SAEConfig?.supportsCustomSequence && (
-              <CustomSeqPlayground feature={feature} saeName={model} />
-            )}
+            {SAEConfig?.supportsCustomSequence && <CustomSeqPlayground />}
             {isLoading ? (
               <div className="flex items-center justify-center w-full mt-5">
                 <img

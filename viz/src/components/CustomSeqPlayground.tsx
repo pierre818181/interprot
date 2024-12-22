@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useContext } from "react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import {
@@ -16,11 +16,7 @@ import useUrlState from "@/hooks/useUrlState";
 import FullSeqsViewer from "./FullSeqsViewer";
 import PDBStructureViewer from "./PDBStructureViewer";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
-interface CustomSeqPlaygroundProps {
-  feature: number;
-  saeName: string;
-}
+import { SAEContext } from "@/SAEContext";
 
 enum PlaygroundState {
   IDLE,
@@ -37,7 +33,7 @@ const initialState = {
   steeredActivations: [] as number[],
 } as const;
 
-const CustomSeqPlayground = ({ feature, saeName }: CustomSeqPlaygroundProps) => {
+const CustomSeqPlayground = () => {
   const [inputProteinActivations, setInputProteinActivations] = useState<ProteinActivationsData>(
     initialState.inputProteinActivations
   );
@@ -49,11 +45,12 @@ const CustomSeqPlayground = ({ feature, saeName }: CustomSeqPlaygroundProps) => 
   const [steeredActivations, setSteeredActivations] = useState<number[]>(
     initialState.steeredActivations
   );
+  const { feature, model } = useContext(SAEContext);
 
   const [urlState, setUrlState] = useUrlState<{ pdb?: string; seq?: string }>();
 
   const handleSubmit = useCallback(
-    async (submittedInput: ValidSeqInput) => {
+    async (submittedInput: ValidSeqInput, feature: number, model: string) => {
       setViewerState(PlaygroundState.LOADING_SAE_ACTIVATIONS);
 
       setInputProteinActivations(initialState.inputProteinActivations);
@@ -63,15 +60,15 @@ const CustomSeqPlayground = ({ feature, saeName }: CustomSeqPlaygroundProps) => 
 
       if (isPDBID(submittedInput)) {
         setInputProteinActivations(
-          await constructProteinActivationsDataFromPDBID(submittedInput, feature, saeName)
+          await constructProteinActivationsDataFromPDBID(submittedInput, feature, model)
         );
       } else {
         setInputProteinActivations(
-          await constructProteinActivationsDataFromSequence(submittedInput, feature, saeName)
+          await constructProteinActivationsDataFromSequence(submittedInput, feature, model)
         );
       }
     },
-    [feature, saeName]
+    []
   );
 
   // Reset some states when the user navigates to a new feature
@@ -85,16 +82,17 @@ const CustomSeqPlayground = ({ feature, saeName }: CustomSeqPlaygroundProps) => 
 
   // If an input is set in the URL, submit it
   useEffect(() => {
+    if (feature === undefined) return;
     if (urlState.pdb && isPDBID(urlState.pdb)) {
       setCustomSeqInput(urlState.pdb);
-      handleSubmit(urlState.pdb);
+      handleSubmit(urlState.pdb, feature, model);
     } else if (urlState.seq && isProteinSequence(urlState.seq)) {
       setCustomSeqInput(urlState.seq);
-      handleSubmit(urlState.seq);
+      handleSubmit(urlState.seq, feature, model);
     }
-  }, [urlState.pdb, urlState.seq, setCustomSeqInput, handleSubmit]);
+  }, [urlState.pdb, urlState.seq, setCustomSeqInput, handleSubmit, feature, model]);
 
-  const handleSteer = async () => {
+  const handleSteer = async (input: string, feature: number, model: string) => {
     setViewerState(PlaygroundState.LOADING_STEERED_SEQUENCE);
 
     // Reset some states related to downstream actions
@@ -102,18 +100,20 @@ const CustomSeqPlayground = ({ feature, saeName }: CustomSeqPlaygroundProps) => 
     setSteeredSeq(initialState.steeredSeq);
 
     const steeredSeq = await getSteeredSequence({
-      sequence: proteinInput,
+      sequence: input,
       dim: feature,
       multiplier: steerMultiplier,
+      sae_name: model,
     });
     setSteeredSeq(steeredSeq);
     setSteeredActivations(
-      await getSAEDimActivations({ sequence: steeredSeq, dim: feature, sae_name: saeName })
+      await getSAEDimActivations({ sequence: steeredSeq, dim: feature, sae_name: model })
     );
   };
 
   const onStructureLoad = useCallback(() => setViewerState(PlaygroundState.IDLE), []);
 
+  if (feature === undefined) return null;
   return (
     <div className="mb-6">
       <div className="mt-5">
@@ -251,7 +251,7 @@ const CustomSeqPlayground = ({ feature, saeName }: CustomSeqPlaygroundProps) => 
 
                 {/* Steer button */}
                 <Button
-                  onClick={handleSteer}
+                  onClick={() => handleSteer(proteinInput, feature, model)}
                   disabled={playgroundState === PlaygroundState.LOADING_STEERED_SEQUENCE}
                   className="w-full sm:w-auto min-w-24"
                 >
