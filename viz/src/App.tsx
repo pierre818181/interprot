@@ -4,6 +4,7 @@ import LandingPage from "./components/LandingPage";
 import SAEVisualizerPage from "./SAEVisualizerPage";
 import ErrorBoundary from "./components/ErrorBoundary";
 import CustomSeqSearchPage from "./components/CustomSeqSearchPage";
+import AboutPage from "./components/AboutPage";
 import { SAEProvider } from "./SAEContext";
 import { DEFAULT_SAE_MODEL } from "./config";
 import { SAE_CONFIGS } from "./SAEConfigs";
@@ -12,6 +13,10 @@ const router = createHashRouter([
   {
     path: "/",
     element: <LandingPage />,
+  },
+  {
+    path: "/about",
+    element: <AboutPage />,
   },
   {
     path: "/sae-viz",
