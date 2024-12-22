@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import Navbar from "./Navbar";
+import Markdown from "@/components/Markdown";
 
 const EmbeddedTweet = ({ url }: { url: string }) => {
   return (
@@ -31,9 +32,11 @@ const AboutPage: React.FC = () => {
       <div className="container mx-auto px-4 py-8">
         <h1 className="text-4xl mt-12 text-left">About InterProt</h1>
         <p className="mt-6 text-left">
-          We're working on writing up some more technical details. Stay tuned! Meanwhile, if you're
-          interested in learning more about the background, methods, and our visualizer features,
-          check out these tweets:
+          <Markdown>
+            We're working on writing up some more technical details. Stay tuned! Meanwhile, if
+            you're interested in learning more about the background, methods, and our
+            [visualizer](/#/sae-viz) features, check out these tweets:
+          </Markdown>
         </p>
         <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           <EmbeddedTweet url="https://twitter.com/liambai21/status/1852765669080879108" />
@@ -43,9 +46,11 @@ const AboutPage: React.FC = () => {
 
         <h1 className="text-4xl mt-10 text-left">Learning from the Community</h1>
         <p className="mt-6 text-left">
-          Since we shared InterProt on Twitter, it has been motivating and inspiring to see the
-          community effort on interpreting SAE features. If you find a cool feature, please reach
-          out!
+          <Markdown>
+            Since we shared InterProt on Twitter, it has been motivating and inspiring to see the
+            community effort on interpreting SAE features. If you find a cool feature in our
+            [visualizer](/#/sae-viz), please reach out!
+          </Markdown>
         </p>
         <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           <EmbeddedTweet url="https://twitter.com/ddelalamo/status/1854785030523924882" />
