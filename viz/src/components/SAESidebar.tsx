@@ -53,7 +53,12 @@ export default function SAESidebar() {
           <div className="m-3">
             <HomeNavigator />
           </div>
-          <Select value={model} onValueChange={(value) => navigate(`/sae-viz/${value}`)}>
+          <Select
+            value={model}
+            onValueChange={(value) =>
+              navigate(`/sae-viz/${value}${feature !== undefined ? `/${feature}` : ""}`)
+            }
+          >
             <SelectTrigger className="mb-3">
               <SelectValue placeholder="Select SAE Model" />
             </SelectTrigger>

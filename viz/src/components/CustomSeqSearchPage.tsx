@@ -217,6 +217,7 @@ export default function CustomSeqSearchPage() {
 
   // Do a search whenever the input changes
   useEffect(() => {
+    setSearchResults([]);
     if (urlState.pdb && isPDBID(urlState.pdb)) {
       setInput(urlState.pdb);
       handleSearch(urlState.pdb);
@@ -225,11 +226,10 @@ export default function CustomSeqSearchPage() {
       handleSearch(urlState.seq);
     } else {
       setInput("");
-      setSearchResults([]);
     }
     // handleSearch runs unnecessarily if I add it here
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [urlState.pdb, urlState.seq]);
+  }, [urlState.pdb, urlState.seq, model]);
 
   // Do a search whenever the chain changes
   useEffect(() => {
