@@ -32,10 +32,16 @@ const AboutPage: React.FC = () => {
       <div className="container mx-auto px-4 py-8">
         <h1 className="text-4xl mt-12 text-left">About InterProt</h1>
         <p className="mt-6 text-left">
+          InterProt is an open-source project applying mechanistic interpretability to protein
+          language models. The goal is to better understand these models and steer them to design
+          new proteins.
+        </p>
+        <p className="mt-6 text-left">
           <Markdown>
-            We're working on writing up some more technical details. Stay tuned! Meanwhile, if
-            you're interested in learning more about the background, methods, and our
-            [visualizer](/#/sae-viz) features, check out these tweets:
+            We trained some Sparse Autoencoders (SAEs) on
+            [ESM2](https://github.com/facebookresearch/esm), build an interactive
+            [visualizer](/#/sae-viz), and are working on writing up more technical details.
+            Meanwhile, if you're interested in learning more, check out these tweets:
           </Markdown>
         </p>
         <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">

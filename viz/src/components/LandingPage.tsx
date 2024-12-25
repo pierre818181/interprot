@@ -4,6 +4,7 @@ import Navbar from "./Navbar";
 import { useIsMobile } from "../hooks/use-mobile";
 import { DEFAULT_SAE_MODEL } from "@/config";
 import { SAE_CONFIGS } from "@/SAEConfigs";
+import Markdown from "@/components/Markdown";
 
 const LandingPage: React.FC = () => {
   const isMobile = useIsMobile();
@@ -25,16 +26,11 @@ const LandingPage: React.FC = () => {
           new proteins.
         </p>
         <p className="text-base sm:text-xl mb-8 max-w-2xl order-3 sm:order-none">
-          The project was started by{" "}
-          <a href="https://etowahadams.com" className="underline">
-            Etowah
-          </a>{" "}
-          and{" "}
-          <a href="https://liambai.com" className="underline">
-            Liam
-          </a>
-          . They trained some Sparse Autoencoders on ESM2 and built an interactive visualizer. More
-          soon!
+          <Markdown>
+            The project was started by [Etowah](https://etowahadams.com) and
+            [Liam](https://liambai.com). They trained some Sparse Autoencoders on ESM2 and built an
+            interactive visualizer. More soon!
+          </Markdown>
         </p>
         <Link
           to={`/sae-viz/${DEFAULT_SAE_MODEL}/${SAE_CONFIGS[DEFAULT_SAE_MODEL].defaultDim}`}
