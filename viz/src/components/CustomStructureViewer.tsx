@@ -138,6 +138,7 @@ const CustomStructureViewer = ({
         plugin.dataTransaction(async () => {
           for (const s of plugin.managers.structure.hierarchy.current.structures) {
             await plugin.managers.structure.component.updateRepresentationsTheme(s.components, {
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
               color: ResidueColorTheme.propertyProvider.descriptor.name as any,
             });
           }
