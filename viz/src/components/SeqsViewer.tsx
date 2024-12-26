@@ -2,13 +2,16 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import { redColorMapHex } from "@/utils";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-import { Copy, Check } from "lucide-react";
+import { Copy, Check, HelpCircle } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import Markdown from "./Markdown";
 
 // NOTE(liam): This component is written by Cursor pretty much entirely.
 
 export interface SeqWithSAEActs {
   sequence: string;
+  "3di_sequence"?: string;
   sae_acts: Array<number>;
   alphafold_id: string;
   uniprot_id: string;
@@ -26,6 +29,14 @@ export default function SeqsViewer({ seqs, title }: SeqsViewerProps) {
   const [isAligning, setIsAligning] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [sequenceType, setSequenceType] = useState<"aa" | "3di">("aa");
+
+  const getSourceSequence = useCallback(
+    (seq: SeqWithSAEActs) => {
+      return sequenceType === "3di" && seq["3di_sequence"] ? seq["3di_sequence"] : seq.sequence;
+    },
+    [sequenceType]
+  );
 
   useEffect(() => {
     if (seqs.length === 0) return;
@@ -52,7 +63,8 @@ export default function SeqsViewer({ seqs, title }: SeqsViewerProps) {
           const leftPadding = firstActIndex - firstNonzeroIdx;
           const rightPadding = maxLength - (leftPadding + seq.sequence.length);
 
-          const paddedSeq = "-".repeat(leftPadding) + seq.sequence + "-".repeat(rightPadding);
+          const paddedSeq =
+            "-".repeat(leftPadding) + getSourceSequence(seq) + "-".repeat(rightPadding);
           const paddedActs = Array(leftPadding)
             .fill(null)
             .concat(seq.sae_acts)
@@ -88,7 +100,8 @@ export default function SeqsViewer({ seqs, title }: SeqsViewerProps) {
           const leftPadding = maxActIndex - maxLocalIdx;
           const rightPadding = maxLength - (leftPadding + seq.sequence.length);
 
-          const paddedSeq = "-".repeat(leftPadding) + seq.sequence + "-".repeat(rightPadding);
+          const paddedSeq =
+            "-".repeat(leftPadding) + getSourceSequence(seq) + "-".repeat(rightPadding);
           const paddedActs = Array(leftPadding)
             .fill(null)
             .concat(seq.sae_acts)
@@ -106,8 +119,11 @@ export default function SeqsViewer({ seqs, title }: SeqsViewerProps) {
         setTimeout(() => scrollToPosition(maxActIndex - 30), 0);
         setIsAligning(false);
       } else if (alignmentMode === "msa") {
+        // Get the appropriate sequence type for each sequence
+        const sequencesToAlign = seqs.map(getSourceSequence);
+
         // @ts-expect-error biomsa is loaded through a script tag in index.html
-        biomsa.align(seqs.map((seq) => seq.sequence)).then((result) => {
+        biomsa.align(sequencesToAlign).then((result) => {
           // Update sequences with aligned versions
           const newAlignedSeqs = seqs.map((seq, i) => {
             const alignedSeq = result[i];
@@ -138,7 +154,7 @@ export default function SeqsViewer({ seqs, title }: SeqsViewerProps) {
         });
       }
     }, 0);
-  }, [seqs, alignmentMode]);
+  }, [seqs, alignmentMode, sequenceType, getSourceSequence]);
 
   const scrollToPosition = (index: number) => {
     if (!containerRef.current) return;
@@ -168,7 +184,39 @@ export default function SeqsViewer({ seqs, title }: SeqsViewerProps) {
     <>
       <div className="flex items-center gap-4 mt-2 justify-between flex-wrap">
         {title && <h2 className="text-2xl font-semibold">{title}</h2>}
-        <div className="hidden sm:flex items-center gap-4">
+        <div className="hidden sm:flex items-center gap-6">
+          <div className="flex items-center gap-2">
+            <Tabs
+              value={sequenceType}
+              onValueChange={(value) => setSequenceType(value as "aa" | "3di")}
+              className="w-[120px]"
+            >
+              <TabsList className="grid w-full grid-cols-2">
+                <TabsTrigger value="aa">AA</TabsTrigger>
+                <TabsTrigger value="3di" disabled={!seqs.some((seq) => seq["3di_sequence"])}>
+                  3Di
+                </TabsTrigger>
+              </TabsList>
+            </Tabs>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger>
+                  <HelpCircle className="h-4 w-4 text-muted-foreground" />
+                </TooltipTrigger>
+                <TooltipContent className="max-w-[300px]">
+                  <p className="text-sm">
+                    <span className="font-semibold">AA:</span> Amino acid tokens
+                    <br />
+                    <span className="font-semibold">3Di:</span>{" "}
+                    <Markdown>
+                      Structural tokens describing geometric conformation, invented for
+                      [Foldseek](https://www.nature.com/articles/s41587-023-01773-0)
+                    </Markdown>
+                  </p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          </div>
           <ToggleGroup
             type="single"
             value={alignmentMode}

@@ -7,7 +7,7 @@ interface MarkdownProps {
 
 const Markdown: FC<MarkdownProps> = ({ children }) => {
   return (
-    <div className="markdown-content">
+    <span className="markdown-content">
       <MarkdownToJSX
         options={{
           overrides: {
@@ -28,7 +28,7 @@ const Markdown: FC<MarkdownProps> = ({ children }) => {
       >
         {children}
       </MarkdownToJSX>
-    </div>
+    </span>
   );
 };
 
