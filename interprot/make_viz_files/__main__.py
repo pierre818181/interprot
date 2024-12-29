@@ -102,7 +102,7 @@ def make_viz_files(checkpoint_files: list[str], sequences_file: str):
             # Move to CPU and convert to numpy immediately
             sae_acts_cpu = sae_acts.cpu().numpy()
             all_seqs_max_act[:, seq_idx] = np.max(sae_acts_cpu, axis=0)
-            sae_acts_int = (sae_acts_cpu * 10).astype(np.uint8)
+            sae_acts_int = (sae_acts_cpu).astype(np.float16)
             # Convert to sparse matrix. This significantly reduces memory usage
             sparse_acts = sparse.csr_matrix(sae_acts_int)
             all_acts[seq_idx] = sparse_acts
@@ -190,7 +190,7 @@ def write_viz_file(dim_info, dim, all_acts, df, range_names):
             sequence = df[seq_idx]["Sequence"].item()
 
             examples = {
-                "sae_acts": [round(float(act) / 10, 1) for act in dim_acts],
+                "sae_acts": [round(float(act), 1) for act in dim_acts],
                 "sequence": sequence,
                 "alphafold_id": alphafolddb_id,
                 "uniprot_id": uniprot_id,
