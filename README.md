@@ -4,6 +4,8 @@ This repo contains tools used to interpret protein language models. `viz` contai
 
 ## The visualizer
 
+asdadsdadasd
+
 ```bash
 cd viz
 pnpm install
